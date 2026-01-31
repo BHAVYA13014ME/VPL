@@ -1,0 +1,30 @@
+{
+  "name": "vertual-lerning",
+  "version": "1.0.0",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "install-deps": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "heroku-postbuild": "npm run install-deps && npm run build"
+  },
+  "keywords": [
+    "virtual learning",
+    "education",
+    "MERN",
+    "e-learning",
+    "online courses"
+  ],
+  "author": "Virtual Learning Team",
+  "license": "ISC",
+  "description": "A comprehensive virtual learning platform built with MERN stack featuring real-time collaboration, gamification, and analytics.",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "vertual-lerning": "file:"
+  }
+}

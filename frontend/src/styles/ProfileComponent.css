@@ -1,0 +1,121 @@
+/* Profile Component Premium Styles */
+
+.profile-component {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Profile Avatar Pulse Animation */
+@keyframes profile-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(79, 172, 254, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 172, 254, 0);
+  }
+}
+
+.profile-avatar-online {
+  animation: profile-pulse 2s infinite;
+}
+
+/* Profile Dropdown Animations */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.profile-dropdown {
+  animation: fadeInDown 0.3s ease-out;
+}
+
+/* Premium Glass Effect for Profile Menu */
+.profile-menu {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+}
+
+/* Notification Badge Glow */
+@keyframes notification-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(244, 67, 54, 0.8);
+  }
+}
+
+.notification-badge {
+  animation: notification-glow 2s ease-in-out infinite;
+}
+
+/* Online Status Indicator */
+.online-indicator {
+  position: relative;
+}
+
+.online-indicator::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(45deg, #4caf50, #8bc34a);
+  border: 2px solid white;
+  border-radius: 50%;
+  animation: profile-pulse 2s infinite;
+}
+
+/* Hover Effects */
+.profile-component:hover .profile-avatar {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.profile-menu-item:hover {
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 195, 0.1));
+  transform: translateX(4px);
+  transition: all 0.3s ease;
+}
+
+/* Premium Typography */
+.profile-name {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+.profile-role {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-component {
+    gap: 4px;
+  }
+  
+  .profile-name,
+  .profile-role {
+    display: none;
+  }
+}

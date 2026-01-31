@@ -1,0 +1,374 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+:root {
+  --primary-color: #c6c3c3;
+  --second-color: #ffffff;
+  --black-color: #000000;
+}
+
+.modern-login-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: url("https://static.vecteezy.com/system/resources/previews/001/937/697/non_2x/online-education-application-learning-worldwide-on-computer-mobile-website-background-social-distance-concept-the-classroom-training-course-library-illustration-flat-vector.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+a {
+  text-decoration: none;
+  color: var(--second-color);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.login-wrapper:hover {
+  width: 450px;
+  height: 500px;
+}
+
+.login_box {
+  position: relative;
+  width: 450px;
+  backdrop-filter: blur(25px);
+  border: 2px solid var(--primary-color);
+  border-radius: 15px;
+  padding: 7.5em 2.5em 4em 2.5em;
+  color: var(--second-color);
+  box-shadow: 0px 0px 10px 2px rgba(0, 0, 0, 0.2);
+}
+
+.login-header {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-color);
+  width: 140px;
+  height: 70px;
+  border-radius: 0 0 20px 20px;
+}
+
+.login-header span {
+  font-size: 30px;
+  color: var(--black-color);
+}
+
+.login-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -30px;
+  width: 30px;
+  height: 30px;
+  border-top-right-radius: 50%;
+  background: transparent;
+  box-shadow: 15px 0 0 0 var(--primary-color);
+}
+
+.login-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -30px;
+  width: 30px;
+  height: 30px;
+  border-top-left-radius: 50%;
+  background: transparent;
+  box-shadow: -15px 0 0 0 var(--primary-color);
+}
+
+.input_box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0;
+}
+
+.input-field {
+  width: 100%;
+  height: 55px;
+  font-size: 16px;
+  background: transparent;
+  color: var(--second-color);
+  padding-inline: 20px 50px;
+  border: 2px solid var(--primary-color);
+  border-radius: 30px;
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#user {
+  margin-bottom: 10px;
+}
+
+.label {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  transition: 0.2s;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.input-field:focus ~ .label,
+.input-field:valid ~ .label {
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  font-size: 14px;
+  background-color: var(--primary-color);
+  border-radius: 30px;
+  color: var(--black-color);
+  padding: 0 10px;
+}
+
+.icon {
+  position: absolute;
+  top: 18px;
+  right: 25px;
+  font-size: 20px;
+  color: var(--second-color);
+}
+
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  margin: 15px 0;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remember-me input[type="checkbox"] {
+  margin: 0;
+}
+
+.remember-me label {
+  color: var(--second-color);
+  cursor: pointer;
+}
+
+.forgot a {
+  color: var(--second-color);
+  font-size: 15px;
+}
+
+.input-submit {
+  width: 100%;
+  height: 50px;
+  background: #ececec;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: 0.3s;
+  color: var(--black-color);
+}
+
+.input-submit:hover {
+  background: var(--second-color);
+}
+
+.input-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.register {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.register span {
+  color: var(--second-color);
+}
+
+.register a {
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.error-message {
+  color: #ff4757;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-left: 20px;
+}
+
+.error-banner {
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid #ff4757;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
+  color: #ff4757;
+  text-align: center;
+  font-size: 14px;
+}
+
+.toggle-mode {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.toggle-link {
+  color: var(--primary-color);
+  cursor: pointer;
+  font-weight: 500;
+  background: none;
+  border: none;
+  font-size: 15px;
+}
+
+.toggle-link:hover {
+  text-decoration: underline;
+}
+
+/* Registration specific styles */
+.register-mode .login-header span {
+  font-size: 24px;
+}
+
+.role-selector {
+  display: flex;
+  gap: 15px;
+  margin: 10px 0;
+}
+
+.role-option {
+  flex: 1;
+  cursor: pointer;
+}
+
+.role-option input[type="radio"] {
+  display: none;
+}
+
+.role-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--primary-color);
+  border-radius: 15px;
+  padding: 15px;
+  text-align: center;
+  transition: all 0.3s ease;
+  color: var(--second-color);
+}
+
+.role-card i {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.role-option input[type="radio"]:checked + .role-card {
+  border-color: var(--second-color);
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+@media only screen and (max-width: 564px) {
+  .wrapper {
+    padding: 20px;
+  }
+  .login_box {
+    padding: 7.5em 1.5em 4em 1.5em;
+    width: 100%;
+  }
+  
+  .role-selector {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+.input-glow,
+.button-glow,
+.social-login,
+.cosmic-header,
+.cosmic-subtitle,
+.form-footer,
+.link-button {
+  display: none;
+}
+
+/* Register mode styles */
+.register-mode .cosmic-form {
+  transform: translateY(0px);
+}
+
+.register-panel {
+  display: none;
+}
+
+.register-mode .login-panel {
+  display: none;
+}
+
+.register-mode .register-panel {
+  display: block;
+}
+
+.register-mode .login-wrapper {
+  height: 600px;
+}
+
+.register-mode .login-wrapper:hover {
+  height: 650px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-wrapper {
+    width: 350px;
+    margin: 20px;
+  }
+
+  .login-wrapper:hover {
+    width: 380px;
+  }
+
+  .cosmic-form {
+    width: 80%;
+  }
+
+  .cosmic-title {
+    font-size: 1.2rem;
+  }
+
+  .role-selector {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
