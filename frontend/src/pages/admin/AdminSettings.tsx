@@ -22,6 +22,7 @@ import {
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin' },
   { text: 'Users', icon: <People />, path: '/admin/users' },

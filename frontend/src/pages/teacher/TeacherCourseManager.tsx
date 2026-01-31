@@ -15,7 +15,6 @@ import {
   IconButton,
   Card,
   CardContent,
-  CardActions,
   Chip,
   Alert,
   CircularProgress,
@@ -25,22 +24,9 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Avatar,
   Tooltip,
-  LinearProgress,
   Snackbar,
-  Skeleton,
-  Alert as MuiAlert,
-  Fade
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -51,23 +37,18 @@ import {
   PictureAsPdf as PdfIcon,
   Quiz as QuizIcon,
   PlayCircle as PlayIcon,
-  ExpandMore as ExpandMoreIcon,
-  DragIndicator as DragIcon,
   CloudUpload as UploadIcon,
   Announcement as AnnouncementIcon,
   Close as CloseIcon,
   Save as SaveIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
   AttachFile as AttachFileIcon,
   School as SchoolIcon,
   People as PeopleIcon,
   Assignment as AssignmentIcon,
   ArrowBack as ArrowBackIcon,
-  Download as DownloadIcon,
+  DragIndicator as DragIcon,
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
-import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
 
@@ -106,6 +87,7 @@ interface Course {
   isPublished: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const menuItems = [
   { text: 'Dashboard', icon: <SchoolIcon />, path: '/teacher' },
   { text: 'My Courses', icon: <SchoolIcon />, path: '/courses' },
@@ -115,13 +97,10 @@ const menuItems = [
 const TeacherCourseManager: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
-  const [snackbar, setSnackbar] = useState<{open: boolean; message: string; severity: 'success' | 'error' | 'warning' | 'info'}>({open: false, message: '', severity: 'info'});
   const [success, setSuccess] = useState('');
 
   // Lesson Dialog State
@@ -156,6 +135,7 @@ const TeacherCourseManager: React.FC = () => {
     if (id) {
       fetchCourse();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchCourse = async () => {

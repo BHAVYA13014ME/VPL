@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Button,
   Chip,
@@ -15,11 +14,9 @@ import {
   ListItemIcon,
   ListItemText,
   ListItemButton,
-  Collapse,
   CircularProgress,
   Alert,
   Paper,
-  Grid,
   LinearProgress,
   Accordion,
   AccordionSummary,
@@ -44,18 +41,13 @@ import {
   Lock as LockIcon,
   AccessTime as TimeIcon,
   People as PeopleIcon,
-  Star as StarIcon,
   School as SchoolIcon,
   ArrowBack as ArrowBackIcon,
-  Bookmark as BookmarkIcon,
-  BookmarkBorder as BookmarkBorderIcon,
   PlayArrow as StartIcon,
-  Share as ShareIcon,
   Language as LanguageIcon,
   Description as DescriptionIcon,
   VideoLibrary as VideoIcon,
   Close as CloseIcon,
-  Assignment as AssignmentIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import Layout from '../../components/layout/Layout';
@@ -166,6 +158,7 @@ const CourseDetail: React.FC = () => {
   useEffect(() => {
     fetchCourseDetails();
     checkEnrollmentStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchCourseDetails = async () => {

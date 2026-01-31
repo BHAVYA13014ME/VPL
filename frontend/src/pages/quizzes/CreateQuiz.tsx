@@ -6,10 +6,6 @@ import {
   Button,
   Paper,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   IconButton,
   Card,
   CardContent,
@@ -25,11 +21,9 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Divider,
   Snackbar,
   Radio,
   RadioGroup,
-  FormLabel,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -38,22 +32,17 @@ import {
 import {
   Add as AddIcon,
   Close as CloseIcon,
-  Save as SaveIcon,
   ArrowBack as ArrowBackIcon,
   ArrowForward as ArrowForwardIcon,
-  Assignment as AssignmentIcon,
-  School as SchoolIcon,
-  Quiz as QuizIcon,
   Delete as DeleteIcon,
   ExpandMore as ExpandMoreIcon,
   Check as CheckIcon,
   ContentCopy as CopyIcon,
   DragIndicator as DragIcon,
-  Settings as SettingsIcon,
   Timer as TimerIcon,
+  Settings as SettingsIcon,
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
-import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 
 interface Course {
@@ -75,7 +64,6 @@ const steps = ['Basic Info', 'Add Questions', 'Settings & Review'];
 
 const CreateQuiz: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [fetchingCourses, setFetchingCourses] = useState(true);

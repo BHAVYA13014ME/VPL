@@ -104,7 +104,7 @@ export const API_CONFIG_WITH_AUTH = {
   },
 };
 
-export default {
+const apiExports = {
   API_BASE_URL,
   API_ENDPOINTS,
   buildApiUrl,
@@ -112,3 +112,5 @@ export default {
   API_CONFIG,
   API_CONFIG_WITH_AUTH
 };
+
+export default apiExports;

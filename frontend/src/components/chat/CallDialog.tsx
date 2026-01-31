@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -6,11 +6,7 @@ import {
   Avatar,
   Typography,
   IconButton,
-  Paper,
-  Grid,
-  Button,
   Card,
-  CardContent,
   Slide,
   CircularProgress,
 } from '@mui/material';
@@ -22,9 +18,6 @@ import {
   VideocamOff,
   VolumeUp,
   VolumeOff,
-  Fullscreen,
-  FullscreenExit,
-  SwitchCamera,
 } from '@mui/icons-material';
 import { TransitionProps } from '@mui/material/transitions';
 

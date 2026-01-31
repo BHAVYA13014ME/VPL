@@ -5,20 +5,13 @@ import {
   Card,
   CardContent,
   Typography,
-  LinearProgress,
   Chip,
   Avatar,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
   IconButton,
-  Grid,
   Container,
   Tooltip,
   CircularProgress as MuiCircularProgress,
 } from '@mui/material';
-import type { GridProps } from '@mui/material';
 import {
   School,
   Assignment,
@@ -32,7 +25,6 @@ import {
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import axios from 'axios';
 import { API_BASE_URL } from '../../config/api';
 import '../../styles/PremiumDashboard.css';
@@ -77,7 +69,6 @@ interface Announcement {
 
 const StudentDashboardHome: React.FC = () => {
   const { user } = useAuth();
-  const { theme } = useTheme();
   const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

@@ -25,20 +25,13 @@ import {
   Tooltip,
   CircularProgress,
   Fab,
-  Slide,
   Zoom,
   Collapse,
-  SwipeableDrawer,
-  Tabs,
-  Tab,
   LinearProgress,
   Snackbar,
   Alert,
   ListItemIcon,
-  FormControlLabel,
-  Switch,
   Popover,
-  Grid,
 } from '@mui/material';
 import {
   Send,
@@ -53,54 +46,34 @@ import {
   Reply as ReplyIcon,
   Group,
   Person,
-  CheckCircle,
   Add,
   DoneAll,
   Done,
   Schedule,
   Mic,
-  MicOff,
-  Stop,
   Videocam,
   Call,
   Star,
   StarBorder,
   Archive,
   Unarchive,
-  Block,
-  PersonAdd,
-  ExitToApp,
   Edit,
   Forward,
   PushPin,
   VolumeOff,
   VolumeUp,
   InsertDriveFile,
-  PhotoCamera,
-  Audiotrack,
   VideoLibrary,
-  Description,
   Download,
-  PlayArrow,
-  Pause,
   KeyboardVoice,
-  FilterList,
   ArrowBack,
   Info,
   ContentCopy,
-  Link,
   Report,
   DeleteForever,
   Refresh,
   CameraAlt,
-  Wallpaper,
-  Notifications,
-  Security,
-  Help,
-  Settings,
-  Search as SearchIcon,
   Clear,
-  KeyboardArrowDown,
   ArrowDownward,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
@@ -112,7 +85,7 @@ import CallHistory from '../../components/chat/CallHistory';
 import { useWebRTC } from '../../hooks/useWebRTC';
 import axios from 'axios';
 import { API_ENDPOINTS, buildApiUrl, getAuthHeaders, API_BASE_URL } from '../../utils/api';
-import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 
 // ==================== INTERFACES ====================
 interface Participant {
@@ -255,11 +228,8 @@ const WhatsAppChat: React.FC = () => {
   const [pinnedRooms, setPinnedRooms] = useState<Set<string>>(new Set());
   const [archivedRooms, setArchivedRooms] = useState<Set<string>>(new Set());
   const [showArchived, setShowArchived] = useState(false);
-  const [starredMessages, setStarredMessages] = useState<Message[]>([]);
-  const [showStarredMessages, setShowStarredMessages] = useState(false);
   
   // Emoji & Attachments
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiAnchor, setEmojiAnchor] = useState<null | HTMLElement>(null);
   const [attachmentMenuAnchor, setAttachmentMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -307,8 +277,6 @@ const WhatsAppChat: React.FC = () => {
     answerCall,
     declineCall,
     endCall,
-    toggleAudio,
-    toggleVideo,
   } = useWebRTC({
     roomId: selectedRoom?._id || '',
     userId: user?._id || '',
@@ -336,10 +304,6 @@ const WhatsAppChat: React.FC = () => {
     } else {
       return format(date, 'MMM dd, HH:mm');
     }
-  };
-
-  const formatLastSeen = (timestamp: string) => {
-    return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
   };
 
   const getOtherParticipant = (room: ChatRoom) => {
@@ -679,6 +643,7 @@ const WhatsAppChat: React.FC = () => {
   };
 
   // ==================== CALL API FUNCTIONS ====================
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchCallHistory = async () => {
     try {
       const response = await axios.get(buildApiUrl(API_ENDPOINTS.CALL_HISTORY), {
@@ -695,6 +660,7 @@ const WhatsAppChat: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const recordCall = async (callData: {
     receiverId: string;
     callType: 'voice' | 'video';
@@ -712,6 +678,7 @@ const WhatsAppChat: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const updateCall = async (callId: string, updates: { endTime?: Date; status?: string }) => {
     try {
       await axios.put(buildApiUrl(API_ENDPOINTS.CALL_BY_ID(callId)), updates, {
@@ -722,6 +689,7 @@ const WhatsAppChat: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const deleteCallFromHistory = async (callId: string) => {
     try {
       await axios.delete(buildApiUrl(API_ENDPOINTS.CALL_DELETE(callId)), {
@@ -909,6 +877,7 @@ const WhatsAppChat: React.FC = () => {
     if (savedMuted) setMutedRooms(new Set(JSON.parse(savedMuted)));
     if (savedPinned) setPinnedRooms(new Set(JSON.parse(savedPinned)));
     if (savedArchived) setArchivedRooms(new Set(JSON.parse(savedArchived)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

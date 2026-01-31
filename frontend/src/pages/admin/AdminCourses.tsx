@@ -30,11 +30,8 @@ import {
   Paper
 } from '@mui/material';
 import {
-  Dashboard as DashboardIcon,
   School,
-  People,
   Analytics,
-  Settings,
   Search as SearchIcon,
   Visibility as VisibilityIcon,
   MoreVert as MoreVertIcon,

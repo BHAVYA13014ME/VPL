@@ -21,14 +21,12 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
-import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import AdminUsers from './AdminUsers';
 import AdminCourses from './AdminCourses';
 import AdminSettings from './AdminSettings';
 
 const AdminDashboardHome: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);

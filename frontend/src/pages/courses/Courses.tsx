@@ -4,7 +4,6 @@ import {
   Box,
   Card,
   CardContent,
-  CardMedia,
   Typography,
   Button,
   Drawer,
@@ -21,20 +20,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Paper,
   Avatar,
-  Rating,
-  Divider,
-  LinearProgress,
   Tabs,
   Tab,
   Container,
-  useTheme,
   alpha,
   InputAdornment,
   Fab,
-  Snackbar,
-  Backdrop
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -42,22 +34,13 @@ import {
   School as SchoolIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Visibility as ViewIcon,
   People as PeopleIcon,
   Star as StarIcon,
   AccessTime as TimeIcon,
-  Category as CategoryIcon,
-  Assignment as AssignmentIcon,
-  PlayArrow as PlayIcon,
-  BookmarkBorder as BookmarkIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon,
   TrendingUp as TrendingIcon,
-  Class as ClassIcon,
   CheckCircle as CheckCircleIcon,
   Schedule as ScheduleIcon,
-  MonetizationOn as PaidIcon,
-  LockOpen as FreeIcon,
   Language as LanguageIcon,
   Computer as ComputerIcon,
   Brush as BrushIcon,
@@ -72,7 +55,8 @@ import {
   Publish as PublishIcon,
   Unpublished as UnpublishedIcon,
   Folder as FolderIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  BookmarkBorder as BookmarkIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import Layout from '../../components/layout/Layout';
@@ -174,23 +158,6 @@ const getCategoryIcon = (category: string) => {
   }
 };
 
-const getCategoryColor = (category: string) => {
-  switch (category) {
-    case 'programming': return '#3498db';
-    case 'design': return '#e74c3c';
-    case 'business': return '#2ecc71';
-    case 'marketing': return '#f39c12';
-    case 'photography': return '#9b59b6';
-    case 'music': return '#e67e22';
-    case 'health': return '#1abc9c';
-    case 'fitness': return '#e74c3c';
-    case 'language': return '#f39c12';
-    case 'mathematics': return '#3498db';
-    case 'science': return '#2ecc71';
-    default: return '#95a5a6';
-  }
-};
-
 const getLevelColor = (level: string) => {
   switch (level) {
     case 'beginner': return '#2ecc71';
@@ -233,10 +200,9 @@ const Courses: React.FC = () => {
     isPaid: false
   });
 
-  const theme = useTheme();
-
   useEffect(() => {
     fetchCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeTab]);
 
   const fetchCourses = async () => {
@@ -419,6 +385,7 @@ const Courses: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleEnrollInCourse = async (courseId: string) => {
     try {
       const token = localStorage.getItem('token');

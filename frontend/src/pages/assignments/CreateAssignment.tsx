@@ -6,10 +6,6 @@ import {
   Button,
   Paper,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   IconButton,
   Card,
   CardContent,
@@ -27,23 +23,16 @@ import {
   StepLabel,
   Divider,
   Snackbar,
-  Autocomplete,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Close as CloseIcon,
-  Save as SaveIcon,
   ArrowBack as ArrowBackIcon,
   ArrowForward as ArrowForwardIcon,
-  Assignment as AssignmentIcon,
-  School as SchoolIcon,
   AttachFile as AttachFileIcon,
-  Description as DescriptionIcon,
-  Settings as SettingsIcon,
   Check as CheckIcon,
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
-import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 
 interface Course {
@@ -56,7 +45,6 @@ const steps = ['Basic Info', 'Details & Instructions', 'Settings'];
 
 const CreateAssignment: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [fetchingCourses, setFetchingCourses] = useState(true);

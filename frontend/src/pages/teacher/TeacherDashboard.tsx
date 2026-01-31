@@ -12,7 +12,6 @@ import {
   Tooltip,
 } from '@mui/material';
 import {
-  School,
   Assignment,
   Chat,
   People,
@@ -25,7 +24,6 @@ import {
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import axios from 'axios';
 import '../../styles/PremiumDashboard.css';
 import '../../styles/themes.css';
@@ -63,7 +61,6 @@ interface ActivityItem {
 
 const TeacherDashboardHome: React.FC = () => {
   const { user } = useAuth();
-  const { theme } = useTheme();
   const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState<TeacherDashboardData | null>(null);
   const [loading, setLoading] = useState(true);

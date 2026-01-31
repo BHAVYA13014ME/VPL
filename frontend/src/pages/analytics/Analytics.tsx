@@ -31,9 +31,6 @@ import {
   School as SchoolIcon,
   Assignment as AssignmentIcon,
   Star as StarIcon,
-  Timeline as TimelineIcon,
-  Speed as SpeedIcon,
-  EmojiEvents as TrophyIcon,
   LocalLibrary as LibraryIcon,
   CheckCircle as CheckCircleIcon,
   Chat as ChatIcon,
@@ -86,6 +83,7 @@ const Analytics: React.FC = () => {
   const [engagementData, setEngagementData] = useState<EngagementData | null>(null);
   const [courses, setCourses] = useState<CourseAnalytics[]>([]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const menuItems = user?.role === 'teacher' ? [
     { text: 'Dashboard', icon: <SchoolIcon />, path: '/dashboard' },
     { text: 'My Courses', icon: <SchoolIcon />, path: '/courses' },
@@ -96,6 +94,7 @@ const Analytics: React.FC = () => {
 
   useEffect(() => {
     fetchAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeframe]);
 
   const fetchAnalytics = async () => {

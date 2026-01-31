@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Button,
   Chip,
@@ -16,7 +15,6 @@ import {
   CircularProgress,
   Alert,
   Paper,
-  LinearProgress,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -40,7 +38,6 @@ import {
   CalendarToday as CalendarIcon,
   School as SchoolIcon,
   ArrowBack as ArrowBackIcon,
-  PlayArrow as StartIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
   Close as CloseIcon,
@@ -53,7 +50,6 @@ import {
   Article as EssayIcon,
   Build as ProjectIcon,
   Star as StarIcon,
-  Person as PersonIcon,
   Timer as TimerIcon,
   CloudUpload as UploadIcon,
   Download as DownloadIcon,
@@ -162,6 +158,7 @@ const AssignmentDetail: React.FC = () => {
   const [viewSubmissionDialog, setViewSubmissionDialog] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const menuItems = [
     { text: 'Dashboard', icon: <SchoolIcon />, path: user?.role === 'teacher' ? '/teacher' : '/student' },
     { text: 'My Courses', icon: <SchoolIcon />, path: '/courses' },
@@ -171,6 +168,7 @@ const AssignmentDetail: React.FC = () => {
 
   useEffect(() => {
     fetchAssignmentDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchAssignmentDetails = async () => {

@@ -17,50 +17,39 @@ import {
   ListItemText,
   TextField,
   Switch,
-  FormControlLabel,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
   Badge,
   LinearProgress,
-  Tooltip,
   Zoom,
   Slide,
   Grow,
   Divider,
-  useTheme,
   alpha,
   InputAdornment,
   Alert,
   CircularProgress
 } from '@mui/material';
 import {
-  Person as PersonIcon,
   School as SchoolIcon,
   Assignment as AssignmentIcon,
   Star as StarIcon,
   EmojiEvents as TrophyIcon,
   Edit as EditIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon,
   PhotoCamera as PhotoCameraIcon,
   Email as EmailIcon,
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
-  Work as WorkIcon,
   CalendarToday as CalendarIcon,
-  Psychology as SkillIcon,
   Timeline as TimelineIcon,
   Grade as GradeIcon,
   AccessTime as TimeIcon,
   Notifications as NotificationsIcon,
-  Security as SecurityIcon,
   Visibility as VisibilityIcon,
   Lock as LockIcon,
-  Check as CheckIcon,
-  Close as CloseIcon
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/layout/Layout';
@@ -104,7 +93,6 @@ interface Achievement {
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
-  const theme = useTheme();
   const [profileData, setProfileData] = useState<ProfileData>({
     firstName: '',
     lastName: '',
@@ -132,13 +120,6 @@ const Profile: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const menuItems = [
-    { text: 'Dashboard', icon: <SchoolIcon />, path: user?.role === 'teacher' ? '/teacher' : '/student' },
-    { text: 'My Courses', icon: <SchoolIcon />, path: '/courses' },
-    { text: 'Assignments', icon: <AssignmentIcon />, path: '/assignments' },
-    { text: 'Profile', icon: <PersonIcon />, path: '/profile' }
-  ];
-
   useEffect(() => {
     fetchUserProfile();
     fetchUserStats();
@@ -154,9 +135,8 @@ const Profile: React.FC = () => {
       // Backend returns user object directly, not wrapped in data property
       const userData = response.data;
       
-      // Ensure skills and achievements are always arrays
+      // Ensure skills are always arrays
       const skills = Array.isArray(userData.profile?.skills) ? userData.profile.skills : [];
-      const achievements = Array.isArray(userData.profile?.achievements) ? userData.profile.achievements : [];
       
       setProfileData({
         firstName: userData.firstName || '',
@@ -297,7 +277,6 @@ const Profile: React.FC = () => {
 
   const calculateLevelProgress = () => {
     if (!userStats) return 0;
-    const baseXP = (userStats.currentLevel || 1) * 1000;
     const currentXP = (userStats.totalPoints || 0) % 1000;
     return (currentXP / 1000) * 100;
   };

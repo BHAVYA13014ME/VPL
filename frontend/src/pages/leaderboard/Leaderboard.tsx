@@ -12,7 +12,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
   Chip,
   CircularProgress,
   Alert,
@@ -24,7 +23,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Badge,
   Tooltip,
   IconButton,
   List,
@@ -33,9 +31,8 @@ import {
   ListItemText,
   ListItemAvatar,
   Divider,
-  useTheme,
   alpha,
-  Fab
+  Badge,
 } from '@mui/material';
 import {
   EmojiEvents as TrophyIcon,
@@ -43,15 +40,12 @@ import {
   TrendingUp as TrendingUpIcon,
   Assignment as AssignmentIcon,
   School as SchoolIcon,
-  Person as PersonIcon,
   Timeline as TimelineIcon,
   WorkspacePremium as BadgeIcon,
   EmojiEventsOutlined as AchievementIcon,
   Info as InfoIcon,
   Grade as GradeIcon,
   AccessTime as TimeIcon,
-  Psychology as SkillIcon,
-  Flag as MilestoneIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import Layout from '../../components/layout/Layout';
@@ -73,7 +67,7 @@ interface LeaderboardEntry {
   level: number;
   currentXP: number;
   nextLevelXP: number;
-  badges: Badge[];
+  badges: UserBadge[];
   achievements: Achievement[];
   statistics: Statistics;
   rank: number;
@@ -81,7 +75,7 @@ interface LeaderboardEntry {
   isCurrentUser?: boolean;
 }
 
-interface Badge {
+interface UserBadge {
   type: string;
   level: number;
   earnedAt: string;
@@ -162,6 +156,7 @@ const badgeTypes: BadgeInfo[] = [
   }
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const achievementTypes = [
   { type: 'first_course', title: 'Getting Started', description: 'Completed your first course', rarity: 'common', points: 50 },
   { type: 'perfect_score', title: 'Perfectionist', description: 'Achieved 100% on an assignment', rarity: 'rare', points: 100 },
@@ -182,7 +177,6 @@ const getRarityColor = (rarity: string) => {
 
 const Leaderboard: React.FC = () => {
   const { user } = useAuth();
-  const theme = useTheme();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [userRanking, setUserRanking] = useState<LeaderboardEntry | null>(null);
   const [loading, setLoading] = useState(true);
@@ -196,6 +190,7 @@ const Leaderboard: React.FC = () => {
     if (user) {
       fetchUserRanking();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activeTab]);
 
   const fetchLeaderboard = async () => {
@@ -262,7 +257,7 @@ const Leaderboard: React.FC = () => {
     return badgeTypes.find(b => b.type === badgeType);
   };
 
-  const getBadgeLevel = (badge: Badge): { name: string; color: string } => {
+  const getBadgeLevel = (badge: UserBadge): { name: string; color: string } => {
     const badgeInfo = getBadgeInfo(badge.type);
     const levelInfo = badgeInfo?.levels.find(l => l.level === badge.level);
     return {

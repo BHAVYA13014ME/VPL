@@ -16,27 +16,14 @@ import {
   Alert,
   Chip,
   IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Paper,
   Avatar,
-  LinearProgress,
   Fab,
-  Tooltip,
-  Badge,
   Container,
-  Tabs,
-  Tab,
-  CardMedia,
   CardActions,
-  Stack,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -48,22 +35,11 @@ import {
   Delete as DeleteIcon,
   CalendarToday as CalendarIcon,
   School as SchoolIcon,
-  Category as CategoryIcon,
   Visibility as ViewIcon,
-  AccessTime as TimeIcon,
-  CheckCircle as CheckIcon,
   Warning as WarningIcon,
-  PlayArrow as StartIcon,
-  TrendingUp as TrendingIcon,
-  Book as BookIcon,
   Code as CodeIcon,
   Quiz as QuizIcon,
-  Article as EssayIcon,
-  Build as ProjectIcon,
-  FilterList as FilterIcon,
-  Sort as SortIcon,
   Search as SearchIcon,
-  Star as StarIcon,
   Schedule as ScheduleIcon,
   FolderOpen as FolderOpenIcon,
   MenuBook as MenuBookIcon,
@@ -148,6 +124,7 @@ const Assignments: React.FC = () => {
     if (user?.role === 'teacher') {
       fetchCourses();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchAssignments = async () => {
@@ -378,7 +355,6 @@ const Assignments: React.FC = () => {
   };
 
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('dueDate');
