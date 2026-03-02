@@ -44,7 +44,6 @@ interface Announcement {
 }
 
 // ── Design tokens ──────────────────────────────────────────────
-const NAV  = '#111827';
 const CARD = 'rgba(30,41,64,0.85)';
 const BORDER = 'rgba(255,255,255,0.08)';
 const TEXT  = '#e8dcc4';
