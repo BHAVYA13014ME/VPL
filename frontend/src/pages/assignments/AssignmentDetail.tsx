@@ -1291,7 +1291,7 @@ const AssignmentDetail: React.FC = () => {
                                     variant="contained"
                                     color="primary"
                                     onClick={() => {
-                                      const fileUrl = `http://localhost:5000${file.path}`;
+                                      const fileUrl = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}${file.path}`;
                                       window.open(fileUrl, '_blank');
                                     }}
                                   >
@@ -1313,7 +1313,7 @@ const AssignmentDetail: React.FC = () => {
                             {isImage && (
                               <Box sx={{ mt: 2, textAlign: 'center' }}>
                                 <img 
-                                  src={`http://localhost:5000${file.path}`}
+                                  src={`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}${file.path}`}
                                   alt={file.originalName || file.filename}
                                   style={{ 
                                     maxWidth: '100%', 

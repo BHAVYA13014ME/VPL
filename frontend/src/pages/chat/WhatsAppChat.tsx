@@ -327,7 +327,7 @@ const WhatsAppChat: React.FC = () => {
       case 'delivered':
         return <DoneAll sx={{ fontSize: 14, opacity: 0.6 }} />;
       case 'read':
-        return <DoneAll sx={{ fontSize: 14, color: '#53bdeb' }} />;
+        return <DoneAll sx={{ fontSize: 14, color: '#d97534' }} />;
       case 'failed':
         return <Report sx={{ fontSize: 14, color: 'error.main' }} />;
       default:
@@ -1089,7 +1089,7 @@ const WhatsAppChat: React.FC = () => {
       case 'audio':
         return (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 200 }}>
-            <KeyboardVoice sx={{ color: '#25D366' }} />
+            <KeyboardVoice sx={{ color: '#d97534' }} />
             <audio 
               controls 
               style={{ height: 40 }}
@@ -1173,7 +1173,7 @@ const WhatsAppChat: React.FC = () => {
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-        <CircularProgress sx={{ color: '#25D366' }} />
+        <CircularProgress sx={{ color: '#d97534' }} />
       </Box>
     );
   }
@@ -1183,7 +1183,7 @@ const WhatsAppChat: React.FC = () => {
     <Box sx={{ 
       height: 'calc(100vh - 64px)', 
       display: 'flex', 
-      bgcolor: '#111b21',
+      bgcolor: '#111827',
       position: 'relative'
     }}>
       {/* ==================== LEFT PANEL: CHAT LIST ==================== */}
@@ -1193,22 +1193,22 @@ const WhatsAppChat: React.FC = () => {
         height: '100%', 
         display: 'flex', 
         flexDirection: 'column',
-        bgcolor: '#111b21',
+        bgcolor: '#111827',
         transition: 'width 0.3s'
       }}>
         {/* Header */}
         <Box sx={{ 
           p: 2, 
-          bgcolor: '#202c33',
+          bgcolor: '#1a2640',
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center' 
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar src={(user as any)?.avatar} sx={{ bgcolor: '#25D366' }}>
+            <Avatar src={(user as any)?.avatar} sx={{ bgcolor: '#d97534' }}>
               {user?.firstName?.[0]}
             </Avatar>
-            <Typography variant="h6" sx={{ color: '#e9edef', fontWeight: 500 }}>
+            <Typography variant="h6" sx={{ color: '#e8dcc4', fontWeight: 500 }}>
               Chats
             </Typography>
           </Box>
@@ -1234,7 +1234,7 @@ const WhatsAppChat: React.FC = () => {
           anchorEl={addMenuAnchor}
           open={Boolean(addMenuAnchor)}
           onClose={() => setAddMenuAnchor(null)}
-          PaperProps={{ sx: { bgcolor: '#233138', color: '#e9edef' } }}
+          PaperProps={{ sx: { bgcolor: '#1a2640', color: '#e8dcc4' } }}
         >
           <MenuItem onClick={() => { setAddMenuAnchor(null); setCreateChatOpen(true); }}>
             <ListItemIcon><Person sx={{ color: '#aebac1' }} /></ListItemIcon>
@@ -1247,7 +1247,7 @@ const WhatsAppChat: React.FC = () => {
         </Menu>
 
         {/* Search */}
-        <Box sx={{ p: 1, bgcolor: '#111b21' }}>
+        <Box sx={{ p: 1, bgcolor: '#111827' }}>
           <TextField
             fullWidth
             size="small"
@@ -1257,11 +1257,11 @@ const WhatsAppChat: React.FC = () => {
             InputProps={{
               startAdornment: <InputAdornment position="start"><Search sx={{ color: '#aebac1' }} /></InputAdornment>,
               sx: { 
-                bgcolor: '#202c33', 
+                bgcolor: '#1a2640', 
                 borderRadius: 2,
                 '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                color: '#e9edef',
-                '& input::placeholder': { color: '#8696a0' }
+                color: '#e8dcc4',
+                '& input::placeholder': { color: '#9c8e7a' }
               }
             }}
           />
@@ -1274,29 +1274,29 @@ const WhatsAppChat: React.FC = () => {
             size="small"
             onClick={() => setShowArchived(false)}
             sx={{ 
-              bgcolor: !showArchived ? '#00a884' : '#202c33', 
-              color: !showArchived ? '#111b21' : '#e9edef',
-              '&:hover': { bgcolor: !showArchived ? '#00a884' : '#2a3942' }
+              bgcolor: !showArchived ? '#d97534' : '#1a2640', 
+              color: !showArchived ? '#111827' : '#e8dcc4',
+              '&:hover': { bgcolor: !showArchived ? '#d97534' : '#243355' }
             }}
           />
           <Chip 
             label="Unread" 
             size="small"
-            sx={{ bgcolor: '#202c33', color: '#e9edef', '&:hover': { bgcolor: '#2a3942' } }}
+            sx={{ bgcolor: '#1a2640', color: '#e8dcc4', '&:hover': { bgcolor: '#243355' } }}
           />
           <Chip 
             label="Groups" 
             size="small"
-            sx={{ bgcolor: '#202c33', color: '#e9edef', '&:hover': { bgcolor: '#2a3942' } }}
+            sx={{ bgcolor: '#1a2640', color: '#e8dcc4', '&:hover': { bgcolor: '#243355' } }}
           />
           <Chip 
             label={`Archived (${archivedRooms.size})`}
             size="small"
             onClick={() => setShowArchived(true)}
             sx={{ 
-              bgcolor: showArchived ? '#00a884' : '#202c33', 
-              color: showArchived ? '#111b21' : '#e9edef',
-              '&:hover': { bgcolor: showArchived ? '#00a884' : '#2a3942' }
+              bgcolor: showArchived ? '#d97534' : '#1a2640', 
+              color: showArchived ? '#111827' : '#e8dcc4',
+              '&:hover': { bgcolor: showArchived ? '#d97534' : '#243355' }
             }}
           />
         </Box>
@@ -1317,7 +1317,7 @@ const WhatsAppChat: React.FC = () => {
         <List sx={{ flex: 1, overflow: 'auto', py: 0 }}>
           {filteredRooms.length === 0 ? (
             <Box sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="body2" sx={{ color: '#8696a0' }}>
+              <Typography variant="body2" sx={{ color: '#9c8e7a' }}>
                 {showArchived ? 'No archived chats' : 'No conversations yet'}
               </Typography>
             </Box>
@@ -1335,8 +1335,8 @@ const WhatsAppChat: React.FC = () => {
                     selected={selectedRoom?._id === room._id}
                     sx={{
                       py: 1.5,
-                      '&:hover': { bgcolor: '#202c33' },
-                      '&.Mui-selected': { bgcolor: '#2a3942' },
+                      '&:hover': { bgcolor: '#1a2640' },
+                      '&.Mui-selected': { bgcolor: '#243355' },
                     }}
                   >
                     <ListItemAvatar>
@@ -1347,15 +1347,15 @@ const WhatsAppChat: React.FC = () => {
                         invisible={!isOnline}
                         sx={{
                           '& .MuiBadge-badge': {
-                            backgroundColor: '#25D366',
-                            boxShadow: '0 0 0 2px #111b21',
+                            backgroundColor: '#d97534',
+                            boxShadow: '0 0 0 2px #111827',
                           },
                         }}
                       >
                         <Avatar
                           src={room.type === 'direct' ? otherUser?.avatar : room.avatar}
                           sx={{ 
-                            bgcolor: room.type === 'group' ? '#00a884' : '#6b7b8a',
+                            bgcolor: room.type === 'group' ? '#d97534' : '#2c3e5a',
                             width: 48,
                             height: 48
                           }}
@@ -1371,15 +1371,15 @@ const WhatsAppChat: React.FC = () => {
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Typography component="div" variant="subtitle1" sx={{ color: '#e9edef', fontWeight: 500 }}>
+                          <Typography component="div" variant="subtitle1" sx={{ color: '#e8dcc4', fontWeight: 500 }}>
                             {room.type === 'direct' && otherUser && otherUser.firstName && otherUser.lastName
                               ? `${otherUser.firstName} ${otherUser.lastName}`
                               : room.name || 'Unknown'}
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            {isPinned && <PushPin sx={{ fontSize: 14, color: '#8696a0' }} />}
-                            {isMuted && <VolumeOff sx={{ fontSize: 14, color: '#8696a0' }} />}
-                            <Typography component="div" variant="caption" sx={{ color: '#8696a0' }}>
+                            {isPinned && <PushPin sx={{ fontSize: 14, color: '#9c8e7a' }} />}
+                            {isMuted && <VolumeOff sx={{ fontSize: 14, color: '#9c8e7a' }} />}
+                            <Typography component="div" variant="caption" sx={{ color: '#9c8e7a' }}>
                               {room.lastMessage?.createdAt && formatMessageTime(room.lastMessage.createdAt)}
                             </Typography>
                           </Box>
@@ -1391,7 +1391,7 @@ const WhatsAppChat: React.FC = () => {
                             component="div"
                             variant="body2"
                             sx={{
-                              color: '#8696a0',
+                              color: '#9c8e7a',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap',
@@ -1409,8 +1409,8 @@ const WhatsAppChat: React.FC = () => {
                               badgeContent={room.unreadCount} 
                               sx={{
                                 '& .MuiBadge-badge': {
-                                  bgcolor: '#00a884',
-                                  color: '#111b21',
+                                  bgcolor: '#d97534',
+                                  color: '#111827',
                                   fontWeight: 600
                                 }
                               }}
@@ -1435,7 +1435,7 @@ const WhatsAppChat: React.FC = () => {
         height: '100%', 
         display: 'flex', 
         flexDirection: 'column',
-        bgcolor: '#0b141a',
+        bgcolor: '#111827',
         backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23222d34\' fill-opacity=\'0.4\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
       }}>
         {selectedRoom ? (
@@ -1445,7 +1445,7 @@ const WhatsAppChat: React.FC = () => {
               elevation={0} 
               sx={{ 
                 p: 1.5, 
-                bgcolor: '#202c33',
+                bgcolor: '#1a2640',
                 borderBottom: '1px solid #222d34',
                 display: 'flex',
                 alignItems: 'center',
@@ -1473,20 +1473,20 @@ const WhatsAppChat: React.FC = () => {
                         invisible={!isOnline}
                         sx={{
                           '& .MuiBadge-badge': {
-                            backgroundColor: '#25D366',
-                            boxShadow: '0 0 0 2px #202c33',
+                            backgroundColor: '#d97534',
+                            boxShadow: '0 0 0 2px #1a2640',
                           },
                         }}
                       >
-                        <Avatar src={otherUser?.avatar} sx={{ bgcolor: '#6b7b8a' }}>
+                        <Avatar src={otherUser?.avatar} sx={{ bgcolor: '#2c3e5a' }}>
                           {otherUser && otherUser.firstName && otherUser.lastName && `${otherUser.firstName[0]}${otherUser.lastName[0]}`}
                         </Avatar>
                       </Badge>
                       <Box>
-                        <Typography variant="subtitle1" sx={{ color: '#e9edef', fontWeight: 500 }}>
+                        <Typography variant="subtitle1" sx={{ color: '#e8dcc4', fontWeight: 500 }}>
                           {otherUser && otherUser.firstName && otherUser.lastName && `${otherUser.firstName} ${otherUser.lastName}`}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#8696a0' }}>
+                        <Typography variant="caption" sx={{ color: '#9c8e7a' }}>
                           {isOnline ? 'online' : 'offline'}
                         </Typography>
                       </Box>
@@ -1494,14 +1494,14 @@ const WhatsAppChat: React.FC = () => {
                   );
                 })() : (
                   <>
-                    <Avatar src={selectedRoom.avatar} sx={{ bgcolor: '#00a884' }}>
+                    <Avatar src={selectedRoom.avatar} sx={{ bgcolor: '#d97534' }}>
                       <Group />
                     </Avatar>
                     <Box>
-                      <Typography variant="subtitle1" sx={{ color: '#e9edef', fontWeight: 500 }}>
+                      <Typography variant="subtitle1" sx={{ color: '#e8dcc4', fontWeight: 500 }}>
                         {selectedRoom.name}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: '#8696a0' }}>
+                      <Typography variant="caption" sx={{ color: '#9c8e7a' }}>
                         {selectedRoom.participants.length} participants
                       </Typography>
                     </Box>
@@ -1551,7 +1551,7 @@ const WhatsAppChat: React.FC = () => {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
-                PaperProps={{ sx: { bgcolor: '#233138', color: '#e9edef', minWidth: 200 } }}
+                PaperProps={{ sx: { bgcolor: '#1a2640', color: '#e8dcc4', minWidth: 200 } }}
               >
                 <MenuItem onClick={() => { setAnchorEl(null); setViewInfoOpen(true); }}>
                   <ListItemIcon><Info sx={{ color: '#aebac1' }} /></ListItemIcon>
@@ -1593,7 +1593,7 @@ const WhatsAppChat: React.FC = () => {
 
             {/* Message Search Bar */}
             <Collapse in={showMessageSearch}>
-              <Box sx={{ p: 1, bgcolor: '#202c33', borderBottom: '1px solid #222d34' }}>
+              <Box sx={{ p: 1, bgcolor: '#1a2640', borderBottom: '1px solid #222d34' }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -1610,10 +1610,10 @@ const WhatsAppChat: React.FC = () => {
                       </InputAdornment>
                     ),
                     sx: { 
-                      bgcolor: '#2a3942', 
+                      bgcolor: '#243355', 
                       borderRadius: 2,
                       '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                      color: '#e9edef'
+                      color: '#e8dcc4'
                     }
                   }}
                 />
@@ -1642,16 +1642,16 @@ const WhatsAppChat: React.FC = () => {
                   gap: 2
                 }}>
                   <Box sx={{ 
-                    bgcolor: '#182229', 
+                    bgcolor: '#1a2640', 
                     p: 3, 
                     borderRadius: 2,
                     textAlign: 'center',
                     maxWidth: 400
                   }}>
-                    <Typography variant="body1" sx={{ color: '#e9edef' }}>
+                    <Typography variant="body1" sx={{ color: '#e8dcc4' }}>
                       🔒 Messages are secured with end-to-end education
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#8696a0', display: 'block', mt: 1 }}>
+                    <Typography variant="caption" sx={{ color: '#9c8e7a', display: 'block', mt: 1 }}>
                       Start the conversation!
                     </Typography>
                   </Box>
@@ -1675,7 +1675,7 @@ const WhatsAppChat: React.FC = () => {
                                      isYesterday(new Date(message.createdAt)) ? 'Yesterday' :
                                      format(new Date(message.createdAt), 'MMMM d, yyyy')}
                               size="small"
-                              sx={{ bgcolor: '#182229', color: '#8696a0' }}
+                              sx={{ bgcolor: '#1a2640', color: '#9c8e7a' }}
                             />
                           </Box>
                         )}
@@ -1704,7 +1704,7 @@ const WhatsAppChat: React.FC = () => {
                           <Box sx={{ maxWidth: '65%' }}>
                             {/* Sender name for groups */}
                             {!isOwnMessage && showAvatar && selectedRoom.type !== 'direct' && (
-                              <Typography variant="caption" sx={{ color: '#00a884', ml: 1, fontWeight: 500 }}>
+                              <Typography variant="caption" sx={{ color: '#d97534', ml: 1, fontWeight: 500 }}>
                                 {message.sender?.firstName || 'Unknown'} {message.sender?.lastName || ''}
                               </Typography>
                             )}
@@ -1716,14 +1716,14 @@ const WhatsAppChat: React.FC = () => {
                                   p: 1,
                                   mb: 0.5,
                                   bgcolor: isOwnMessage ? 'rgba(0, 168, 132, 0.2)' : 'rgba(255, 255, 255, 0.1)',
-                                  borderLeft: '4px solid #00a884',
+                                  borderLeft: '4px solid #d97534',
                                   borderRadius: 1,
                                 }}
                               >
-                                <Typography variant="caption" sx={{ color: '#00a884', fontWeight: 600 }}>
+                                <Typography variant="caption" sx={{ color: '#d97534', fontWeight: 600 }}>
                                   {message.replyTo?.sender?.firstName || 'Unknown'}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: '#8696a0', display: 'block' }} noWrap>
+                                <Typography variant="caption" sx={{ color: '#9c8e7a', display: 'block' }} noWrap>
                                   {message.replyTo.content}
                                 </Typography>
                               </Paper>
@@ -1731,7 +1731,7 @@ const WhatsAppChat: React.FC = () => {
 
                             {/* Forwarded label */}
                             {message.forwardedFrom && (
-                              <Typography variant="caption" sx={{ color: '#8696a0', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                              <Typography variant="caption" sx={{ color: '#9c8e7a', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                                 <Forward sx={{ fontSize: 12 }} /> Forwarded
                               </Typography>
                             )}
@@ -1746,8 +1746,8 @@ const WhatsAppChat: React.FC = () => {
                               sx={{
                                 p: 1,
                                 px: 1.5,
-                                bgcolor: isOwnMessage ? '#005c4b' : '#202c33',
-                                color: '#e9edef',
+                                bgcolor: isOwnMessage ? '#2c1d0e' : '#1a2640',
+                                color: '#e8dcc4',
                                 borderRadius: 2,
                                 borderTopLeftRadius: !isOwnMessage && showAvatar ? 0 : 8,
                                 borderTopRightRadius: isOwnMessage ? 0 : 8,
@@ -1771,11 +1771,11 @@ const WhatsAppChat: React.FC = () => {
                                 gap: 0.5 
                               }}>
                                 {message.editedAt && (
-                                  <Typography variant="caption" sx={{ color: '#8696a0', fontSize: '0.65rem' }}>
+                                  <Typography variant="caption" sx={{ color: '#9c8e7a', fontSize: '0.65rem' }}>
                                     edited
                                   </Typography>
                                 )}
-                                <Typography variant="caption" sx={{ color: '#8696a0', fontSize: '0.7rem' }}>
+                                <Typography variant="caption" sx={{ color: '#9c8e7a', fontSize: '0.7rem' }}>
                                   {formatMessageTime(message.createdAt)}
                                 </Typography>
                                 {getMessageStatusIcon(message, isOwnMessage)}
@@ -1800,13 +1800,13 @@ const WhatsAppChat: React.FC = () => {
                                     setEmojiAnchor(e.currentTarget);
                                   }}
                                   sx={{ 
-                                    bgcolor: '#2a3942', 
-                                    '&:hover': { bgcolor: '#3b4a54' },
+                                    bgcolor: '#243355', 
+                                    '&:hover': { bgcolor: '#243355' },
                                     width: 24,
                                     height: 24
                                   }}
                                 >
-                                  <EmojiEmotions sx={{ fontSize: 14, color: '#8696a0' }} />
+                                  <EmojiEmotions sx={{ fontSize: 14, color: '#9c8e7a' }} />
                                 </IconButton>
                               </Box>
                             </Paper>
@@ -1831,9 +1831,9 @@ const WhatsAppChat: React.FC = () => {
                   position: 'absolute',
                   bottom: 100,
                   right: 20,
-                  bgcolor: '#202c33',
-                  color: '#8696a0',
-                  '&:hover': { bgcolor: '#2a3942' }
+                  bgcolor: '#1a2640',
+                  color: '#9c8e7a',
+                  '&:hover': { bgcolor: '#243355' }
                 }}
               >
                 <Badge badgeContent={newMessageCount} color="primary">
@@ -1844,8 +1844,8 @@ const WhatsAppChat: React.FC = () => {
 
             {/* Typing Indicator */}
             <Collapse in={typingUsers.size > 0}>
-              <Box sx={{ px: 2, py: 1, bgcolor: '#0b141a' }}>
-                <Typography variant="caption" sx={{ color: '#00a884' }}>
+              <Box sx={{ px: 2, py: 1, bgcolor: '#111827' }}>
+                <Typography variant="caption" sx={{ color: '#d97534' }}>
                   {Array.from(typingUsers.values()).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing...
                 </Typography>
               </Box>
@@ -1856,22 +1856,22 @@ const WhatsAppChat: React.FC = () => {
               <Paper sx={{ 
                 mx: 2, 
                 p: 1.5, 
-                bgcolor: '#202c33',
-                borderLeft: '4px solid #00a884',
+                bgcolor: '#1a2640',
+                borderLeft: '4px solid #d97534',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}>
                 <Box>
-                  <Typography variant="caption" sx={{ color: '#00a884', fontWeight: 600 }}>
+                  <Typography variant="caption" sx={{ color: '#d97534', fontWeight: 600 }}>
                     Replying to {replyingTo.sender?.firstName || 'Unknown'}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: '#8696a0' }} noWrap>
+                  <Typography variant="body2" sx={{ color: '#9c8e7a' }} noWrap>
                     {replyingTo.content}
                   </Typography>
                 </Box>
                 <IconButton size="small" onClick={() => setReplyingTo(null)}>
-                  <Close sx={{ color: '#8696a0' }} />
+                  <Close sx={{ color: '#9c8e7a' }} />
                 </IconButton>
               </Paper>
             )}
@@ -1881,7 +1881,7 @@ const WhatsAppChat: React.FC = () => {
               <Paper sx={{ 
                 mx: 2, 
                 p: 1.5, 
-                bgcolor: '#202c33',
+                bgcolor: '#1a2640',
                 borderLeft: '4px solid #f59e0b',
                 display: 'flex',
                 alignItems: 'center',
@@ -1899,13 +1899,13 @@ const WhatsAppChat: React.FC = () => {
                     onKeyPress={(e) => e.key === 'Enter' && handleEditMessage()}
                     sx={{ 
                       mt: 1,
-                      '& .MuiOutlinedInput-root': { color: '#e9edef', bgcolor: '#2a3942' }
+                      '& .MuiOutlinedInput-root': { color: '#e8dcc4', bgcolor: '#243355' }
                     }}
                   />
                 </Box>
                 <Box>
                   <IconButton size="small" onClick={() => { setEditingMessage(null); setEditContent(''); }}>
-                    <Close sx={{ color: '#8696a0' }} />
+                    <Close sx={{ color: '#9c8e7a' }} />
                   </IconButton>
                   <IconButton size="small" color="primary" onClick={handleEditMessage}>
                     <Check />
@@ -1916,14 +1916,14 @@ const WhatsAppChat: React.FC = () => {
 
             {/* Selected Files Preview */}
             {selectedFiles.length > 0 && (
-              <Paper sx={{ mx: 2, p: 1.5, bgcolor: '#202c33' }}>
+              <Paper sx={{ mx: 2, p: 1.5, bgcolor: '#1a2640' }}>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {selectedFiles.map((file, index) => (
                     <Chip
                       key={index}
                       label={file.name}
                       onDelete={() => removeSelectedFile(index)}
-                      sx={{ bgcolor: '#2a3942', color: '#e9edef' }}
+                      sx={{ bgcolor: '#243355', color: '#e8dcc4' }}
                       icon={
                         file.type.startsWith('image/') ? <ImageIcon /> :
                         file.type.startsWith('video/') ? <VideoLibrary /> :
@@ -1940,8 +1940,8 @@ const WhatsAppChat: React.FC = () => {
 
             {/* Voice Recording Preview */}
             {audioBlob && !isRecording && (
-              <Paper sx={{ mx: 2, p: 1.5, bgcolor: '#202c33', display: 'flex', alignItems: 'center', gap: 2 }}>
-                <KeyboardVoice sx={{ color: '#00a884' }} />
+              <Paper sx={{ mx: 2, p: 1.5, bgcolor: '#1a2640', display: 'flex', alignItems: 'center', gap: 2 }}>
+                <KeyboardVoice sx={{ color: '#d97534' }} />
                 <audio controls src={URL.createObjectURL(audioBlob)} style={{ flex: 1, height: 40 }} />
                 <IconButton size="small" onClick={() => setAudioBlob(null)}>
                   <Delete sx={{ color: '#ef4444' }} />
@@ -1950,7 +1950,7 @@ const WhatsAppChat: React.FC = () => {
             )}
 
             {/* Message Input */}
-            <Paper elevation={0} sx={{ p: 1.5, bgcolor: '#202c33', display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+            <Paper elevation={0} sx={{ p: 1.5, bgcolor: '#1a2640', display: 'flex', gap: 1, alignItems: 'flex-end' }}>
               {isRecording ? (
                 // Recording UI
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -1965,11 +1965,11 @@ const WhatsAppChat: React.FC = () => {
                       bgcolor: '#ef4444',
                       animation: 'pulse 1s infinite'
                     }} />
-                    <Typography sx={{ color: '#e9edef' }}>
+                    <Typography sx={{ color: '#e8dcc4' }}>
                       {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
                     </Typography>
                   </Box>
-                  <IconButton onClick={stopRecording} sx={{ bgcolor: '#00a884', color: '#fff', '&:hover': { bgcolor: '#008f6c' } }}>
+                  <IconButton onClick={stopRecording} sx={{ bgcolor: '#d97534', color: '#fff', '&:hover': { bgcolor: '#008f6c' } }}>
                     <Send />
                   </IconButton>
                 </Box>
@@ -1977,13 +1977,13 @@ const WhatsAppChat: React.FC = () => {
                 // Normal input UI
                 <>
                   <IconButton 
-                    sx={{ color: '#8696a0' }}
+                    sx={{ color: '#9c8e7a' }}
                     onClick={(e) => setEmojiAnchor(e.currentTarget)}
                   >
                     <EmojiEmotions />
                   </IconButton>
                   <IconButton 
-                    sx={{ color: '#8696a0' }}
+                    sx={{ color: '#9c8e7a' }}
                     onClick={(e) => setAttachmentMenuAnchor(e.currentTarget)}
                   >
                     <AttachFile />
@@ -2003,11 +2003,11 @@ const WhatsAppChat: React.FC = () => {
                     }}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        bgcolor: '#2a3942',
+                        bgcolor: '#243355',
                         borderRadius: 2,
-                        color: '#e9edef',
+                        color: '#e8dcc4',
                         '& fieldset': { border: 'none' },
-                        '& input::placeholder, & textarea::placeholder': { color: '#8696a0' }
+                        '& input::placeholder, & textarea::placeholder': { color: '#9c8e7a' }
                       },
                     }}
                   />
@@ -2016,10 +2016,10 @@ const WhatsAppChat: React.FC = () => {
                       onClick={handleSendMessage}
                       disabled={sendingMessage}
                       sx={{
-                        bgcolor: '#00a884',
+                        bgcolor: '#d97534',
                         color: '#fff',
                         '&:hover': { bgcolor: '#008f6c' },
-                        '&:disabled': { bgcolor: '#2a3942' }
+                        '&:disabled': { bgcolor: '#243355' }
                       }}
                     >
                       {sendingMessage ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : <Send />}
@@ -2027,7 +2027,7 @@ const WhatsAppChat: React.FC = () => {
                   ) : (
                     <IconButton
                       onClick={startRecording}
-                      sx={{ color: '#8696a0' }}
+                      sx={{ color: '#9c8e7a' }}
                     >
                       <Mic />
                     </IconButton>
@@ -2053,10 +2053,10 @@ const WhatsAppChat: React.FC = () => {
               style={{ width: 320, opacity: 0.8 }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
-            <Typography variant="h4" sx={{ color: '#e9edef', fontWeight: 300 }}>
+            <Typography variant="h4" sx={{ color: '#e8dcc4', fontWeight: 300 }}>
               EduVerse Chat
             </Typography>
-            <Typography sx={{ color: '#8696a0', textAlign: 'center', maxWidth: 400 }}>
+            <Typography sx={{ color: '#9c8e7a', textAlign: 'center', maxWidth: 400 }}>
               Send and receive messages securely. Start a conversation with your teachers or classmates.
             </Typography>
           </Box>
@@ -2070,7 +2070,7 @@ const WhatsAppChat: React.FC = () => {
         anchorEl={messageMenuAnchor}
         open={Boolean(messageMenuAnchor)}
         onClose={() => { setMessageMenuAnchor(null); setSelectedMessage(null); }}
-        PaperProps={{ sx: { bgcolor: '#233138', color: '#e9edef', minWidth: 180 } }}
+        PaperProps={{ sx: { bgcolor: '#1a2640', color: '#e8dcc4', minWidth: 180 } }}
       >
         <MenuItem onClick={() => { setReplyingTo(selectedMessage); setMessageMenuAnchor(null); setSelectedMessage(null); }}>
           <ListItemIcon><ReplyIcon sx={{ color: '#aebac1' }} /></ListItemIcon>
@@ -2146,7 +2146,7 @@ const WhatsAppChat: React.FC = () => {
         onClose={() => setEmojiAnchor(null)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        PaperProps={{ sx: { bgcolor: '#233138', p: 2, maxWidth: 320 } }}
+        PaperProps={{ sx: { bgcolor: '#1a2640', p: 2, maxWidth: 320 } }}
       >
         {selectedMessage ? (
           // Quick reactions for message
@@ -2166,7 +2166,7 @@ const WhatsAppChat: React.FC = () => {
           <Box>
             {Object.entries(EMOJI_CATEGORIES).map(([category, emojis]) => (
               <Box key={category} sx={{ mb: 2 }}>
-                <Typography variant="caption" sx={{ color: '#8696a0', mb: 1, display: 'block' }}>
+                <Typography variant="caption" sx={{ color: '#9c8e7a', mb: 1, display: 'block' }}>
                   {category}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -2192,7 +2192,7 @@ const WhatsAppChat: React.FC = () => {
         anchorEl={attachmentMenuAnchor}
         open={Boolean(attachmentMenuAnchor)}
         onClose={() => setAttachmentMenuAnchor(null)}
-        PaperProps={{ sx: { bgcolor: '#233138', color: '#e9edef' } }}
+        PaperProps={{ sx: { bgcolor: '#1a2640', color: '#e8dcc4' } }}
       >
         <MenuItem onClick={() => imageInputRef.current?.click()}>
           <ListItemIcon><ImageIcon sx={{ color: '#bf59cf' }} /></ListItemIcon>
@@ -2239,9 +2239,9 @@ const WhatsAppChat: React.FC = () => {
         onClose={() => setForwardingMessage(null)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { bgcolor: '#111b21', color: '#e9edef' } }}
+        PaperProps={{ sx: { bgcolor: '#111827', color: '#e8dcc4' } }}
       >
-        <DialogTitle sx={{ bgcolor: '#202c33' }}>
+        <DialogTitle sx={{ bgcolor: '#1a2640' }}>
           Forward message to
         </DialogTitle>
         <DialogContent sx={{ p: 0 }}>
@@ -2262,7 +2262,7 @@ const WhatsAppChat: React.FC = () => {
                       primary={room.type === 'direct' && otherUser && otherUser.firstName && otherUser.lastName
                         ? `${otherUser.firstName} ${otherUser.lastName}`
                         : room.name || 'Unknown'}
-                      sx={{ color: '#e9edef' }}
+                      sx={{ color: '#e8dcc4' }}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -2270,8 +2270,8 @@ const WhatsAppChat: React.FC = () => {
             })}
           </List>
         </DialogContent>
-        <DialogActions sx={{ bgcolor: '#202c33' }}>
-          <Button onClick={() => setForwardingMessage(null)} sx={{ color: '#8696a0' }}>
+        <DialogActions sx={{ bgcolor: '#1a2640' }}>
+          <Button onClick={() => setForwardingMessage(null)} sx={{ color: '#9c8e7a' }}>
             Cancel
           </Button>
         </DialogActions>
@@ -2283,9 +2283,9 @@ const WhatsAppChat: React.FC = () => {
         onClose={() => setViewInfoOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { bgcolor: '#111b21', color: '#e9edef' } }}
+        PaperProps={{ sx: { bgcolor: '#111827', color: '#e8dcc4' } }}
       >
-        <DialogTitle sx={{ bgcolor: '#202c33', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <DialogTitle sx={{ bgcolor: '#1a2640', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography component="div" variant="h6">Contact Info</Typography>
           <IconButton onClick={() => setViewInfoOpen(false)}>
             <Close sx={{ color: '#aebac1' }} />
@@ -2295,7 +2295,7 @@ const WhatsAppChat: React.FC = () => {
           {selectedRoom && (
             <Box>
               {/* Header */}
-              <Box sx={{ bgcolor: '#202c33', p: 4, textAlign: 'center' }}>
+              <Box sx={{ bgcolor: '#1a2640', p: 4, textAlign: 'center' }}>
                 <Avatar
                   src={selectedRoom.type === 'direct' ? getOtherParticipant(selectedRoom)?.avatar : selectedRoom.avatar}
                   sx={{ width: 120, height: 120, mx: 'auto', mb: 2 }}
@@ -2307,7 +2307,7 @@ const WhatsAppChat: React.FC = () => {
                     ? `${getOtherParticipant(selectedRoom)?.firstName || 'Unknown'} ${getOtherParticipant(selectedRoom)?.lastName || ''}`
                     : selectedRoom.name}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#8696a0' }}>
+                <Typography variant="body2" sx={{ color: '#9c8e7a' }}>
                   {selectedRoom.type === 'group' 
                     ? `Group · ${selectedRoom.participants.length} participants`
                     : selectedRoom.type}
@@ -2316,8 +2316,8 @@ const WhatsAppChat: React.FC = () => {
 
               {/* Description */}
               {selectedRoom.description && (
-                <Box sx={{ p: 2, bgcolor: '#111b21' }}>
-                  <Typography variant="caption" sx={{ color: '#8696a0' }}>About</Typography>
+                <Box sx={{ p: 2, bgcolor: '#111827' }}>
+                  <Typography variant="caption" sx={{ color: '#9c8e7a' }}>About</Typography>
                   <Typography>{selectedRoom.description}</Typography>
                 </Box>
               )}
@@ -2325,7 +2325,7 @@ const WhatsAppChat: React.FC = () => {
               {/* Participants */}
               {selectedRoom.type !== 'direct' && (
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" sx={{ color: '#8696a0', px: 2, py: 1 }}>
+                  <Typography variant="subtitle2" sx={{ color: '#9c8e7a', px: 2, py: 1 }}>
                     {selectedRoom.participants.length} participants
                   </Typography>
                   <List dense>
@@ -2345,10 +2345,10 @@ const WhatsAppChat: React.FC = () => {
                         <ListItemText
                           primary={`${participant.user?.firstName || 'Unknown'} ${participant.user?.lastName || ''}`}
                           secondary={participant.role}
-                          sx={{ '& .MuiListItemText-secondary': { color: '#8696a0' } }}
+                          sx={{ '& .MuiListItemText-secondary': { color: '#9c8e7a' } }}
                         />
                         {participant.role === 'admin' && (
-                          <Chip label="Admin" size="small" sx={{ bgcolor: '#00a88433', color: '#00a884' }} />
+                          <Chip label="Admin" size="small" sx={{ bgcolor: '#d9753433', color: '#d97534' }} />
                         )}
                       </ListItem>
                     ))}
@@ -2417,7 +2417,7 @@ const WhatsAppChat: React.FC = () => {
         fullWidth
         PaperProps={{
           sx: { 
-            bgcolor: '#111b21', 
+            bgcolor: '#111827', 
             color: 'white',
             minHeight: '60vh',
           }

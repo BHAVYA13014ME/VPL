@@ -35,8 +35,6 @@ import {
   Save,
   LightMode,
   DarkMode,
-  AutoAwesome,
-  Brush,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -45,6 +43,7 @@ import axios from 'axios';
 interface EnhancedSettingsProps {
   open: boolean;
   onClose: () => void;
+  initialTab?: number;
 }
 
 interface TabPanelProps {
@@ -89,8 +88,14 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) => {
-  const [tabValue, setTabValue] = useState(0);
+const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose, initialTab = 0 }) => {
+  const [tabValue, setTabValue] = useState(initialTab);
+
+  // Reset to the correct tab whenever the dialog opens
+  useEffect(() => {
+    if (open) setTabValue(initialTab);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialTab]);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
   const [showPassword, setShowPassword] = useState({ current: false, new: false, confirm: false });
@@ -152,7 +157,7 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
   };
 
   const handleThemeChange = (newTheme: string) => {
-    const validTheme = newTheme as 'light' | 'dark' | 'blue' | 'purple' | 'green';
+    const validTheme = (newTheme === 'light' ? 'light' : 'dark') as 'light' | 'dark';
     setSelectedTheme(validTheme);
     setTheme(validTheme);
     localStorage.setItem('theme', validTheme);
@@ -329,11 +334,8 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
   };
 
   const themeOptions = [
-    { key: 'light', name: 'Light', icon: <LightMode />, color: '#ffffff' },
-    { key: 'dark', name: 'Dark', icon: <DarkMode />, color: '#1a1a1a' },
-    { key: 'blue', name: 'Ocean Blue', icon: <AutoAwesome />, color: '#0066cc' },
-    { key: 'purple', name: 'Purple Galaxy', icon: <Brush />, color: '#6a0dad' },
-    { key: 'gradient', name: 'Rainbow', icon: <Palette />, color: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)' },
+    { key: 'light', name: 'Light', icon: <LightMode />, color: '#f0f4f8' },
+    { key: 'dark', name: 'Dark (Navy)', icon: <DarkMode />, color: 'linear-gradient(135deg,#111827,#1a2332)' },
   ];
 
   return (
@@ -345,9 +347,11 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
         fullWidth
         PaperProps={{
           sx: {
-            bgcolor: 'background.paper',
+            bgcolor: '#111827',
             backgroundImage: 'none',
             minHeight: '70vh',
+            border: '1px solid rgba(217,117,52,0.2)',
+            color: '#e8dcc4',
           }
         }}
       >
@@ -355,38 +359,40 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          borderBottom: 1,
-          borderColor: 'divider'
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          bgcolor: '#0f1923',
         }}>
-          <Typography variant="h5" component="div" sx={{ fontWeight: 700, color: '#000000' }}>
+          <Typography variant="h5" component="div" sx={{ fontWeight: 700, color: '#e8dcc4' }}>
             Settings
           </Typography>
-          <IconButton onClick={onClose} size="large">
+          <IconButton onClick={onClose} size="large" sx={{ color: '#e8dcc4' }}>
             <Close />
           </IconButton>
         </DialogTitle>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
+        <Box sx={{ borderBottom: '1px solid rgba(255,255,255,0.08)', bgcolor: '#0f1923' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs"
+            sx={{
+              '& .MuiTab-root': { color: 'rgba(232,220,196,0.6)' },
+              '& .Mui-selected': { color: '#d97534 !important' },
+              '& .MuiTabs-indicator': { backgroundColor: '#d97534' }
+            }}
+          >
             <Tab 
               icon={<Palette />} 
               label="Themes" 
-              sx={{ color: '#000000', fontWeight: 600 }}
             />
             <Tab 
               icon={<Person />} 
               label="Profile" 
-              sx={{ color: '#000000', fontWeight: 600 }}
             />
             <Tab 
               icon={<Security />} 
               label="Security" 
-              sx={{ color: '#000000', fontWeight: 600 }}
             />
             <Tab 
               icon={<NotificationsIcon />} 
               label="Notifications" 
-              sx={{ color: '#000000', fontWeight: 600 }}
             />
           </Tabs>
         </Box>
@@ -394,7 +400,7 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
         <DialogContent sx={{ p: 0 }}>
           {/* Theme Settings Tab */}
           <TabPanel value={tabValue} index={0}>
-            <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#000000' }}>
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#e8dcc4' }}>
               Choose Your Theme
             </Typography>
             <Box sx={{ 
@@ -409,11 +415,13 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                     sx={{
                       p: 2,
                       cursor: 'pointer',
-                      border: selectedTheme === themeOption.key ? '2px solid #4facfe' : '2px solid transparent',
+                      bgcolor: 'rgba(30,41,64,0.85)',
+                      border: selectedTheme === themeOption.key ? '2px solid #d97534' : '2px solid rgba(255,255,255,0.08)',
                       transition: 'all 0.3s ease',
                       '&:hover': {
                         transform: 'translateY(-4px)',
-                        boxShadow: 4
+                        border: '2px solid rgba(217,117,52,0.5)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
                       }
                     }}
                     onClick={() => handleThemeChange(themeOption.key)}
@@ -434,15 +442,14 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                       >
                         {themeOption.icon}
                       </Box>
-                      <Typography variant="h6" sx={{ fontWeight: 600, color: '#000000' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: '#e8dcc4' }}>
                         {themeOption.name}
                       </Typography>
                       {selectedTheme === themeOption.key && (
                         <Chip
                           label="Active"
-                          color="primary"
                           size="small"
-                          sx={{ mt: 1 }}
+                          sx={{ mt: 1, bgcolor: '#d97534', color: 'white', fontWeight: 700 }}
                         />
                       )}
                     </Box>
@@ -453,12 +460,12 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
 
           {/* Profile Settings Tab */}
           <TabPanel value={tabValue} index={1}>
-            <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#000000' }}>
+            <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#e8dcc4' }}>
               Profile Information
             </Typography>
             
             {/* Profile Picture Section */}
-            <Card sx={{ mb: 3, bgcolor: 'rgba(255, 255, 255, 0.95)' }}>
+            <Card sx={{ mb: 3, bgcolor: 'rgba(30,41,64,0.85)' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                   <Box sx={{ position: 'relative' }}>
@@ -492,10 +499,10 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                     </label>
                   </Box>
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#000000' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#e8dcc4' }}>
                       Profile Picture
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#666666' }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.6)' }}>
                       Click the camera icon to upload a new picture
                     </Typography>
                   </Box>
@@ -511,16 +518,16 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                   label="First Name"
                   value={profileData.firstName}
                   onChange={handleProfileChange('firstName')}
-                  InputLabelProps={{ sx: { color: '#000000' } }}
-                  InputProps={{ sx: { color: '#000000' } }}
+                  InputLabelProps={{ sx: { color: '#e8dcc4' } }}
+                  InputProps={{ sx: { color: '#e8dcc4' } }}
                 />
                 <TextField
                   fullWidth
                   label="Last Name"
                   value={profileData.lastName}
                   onChange={handleProfileChange('lastName')}
-                  InputLabelProps={{ sx: { color: '#000000' } }}
-                  InputProps={{ sx: { color: '#000000' } }}
+                  InputLabelProps={{ sx: { color: '#e8dcc4' } }}
+                  InputProps={{ sx: { color: '#e8dcc4' } }}
                 />
               </Box>
               
@@ -530,8 +537,8 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                 type="email"
                 value={profileData.email}
                 onChange={handleProfileChange('email')}
-                InputLabelProps={{ sx: { color: '#000000' } }}
-                InputProps={{ sx: { color: '#000000' } }}
+                InputLabelProps={{ sx: { color: '#e8dcc4' } }}
+                InputProps={{ sx: { color: '#e8dcc4' } }}
               />
               
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
@@ -540,16 +547,16 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                   label="Phone"
                   value={profileData.phone}
                   onChange={handleProfileChange('phone')}
-                  InputLabelProps={{ sx: { color: '#000000' } }}
-                  InputProps={{ sx: { color: '#000000' } }}
+                  InputLabelProps={{ sx: { color: '#e8dcc4' } }}
+                  InputProps={{ sx: { color: '#e8dcc4' } }}
                 />
                 <TextField
                   fullWidth
                   label="Location"
                   value={profileData.location}
                   onChange={handleProfileChange('location')}
-                  InputLabelProps={{ sx: { color: '#000000' } }}
-                  InputProps={{ sx: { color: '#000000' } }}
+                  InputLabelProps={{ sx: { color: '#e8dcc4' } }}
+                  InputProps={{ sx: { color: '#e8dcc4' } }}
                 />
               </Box>
               
@@ -560,8 +567,8 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                 rows={3}
                 value={profileData.bio}
                 onChange={handleProfileChange('bio')}
-                InputLabelProps={{ sx: { color: '#000000' } }}
-                InputProps={{ sx: { color: '#000000' } }}
+                InputLabelProps={{ sx: { color: '#e8dcc4' } }}
+                InputProps={{ sx: { color: '#e8dcc4' } }}
               />
             </Box>
 
@@ -580,13 +587,13 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
 
           {/* Security Tab */}
           <TabPanel value={tabValue} index={2}>
-            <Typography variant="h5" sx={{ mb: 4, fontWeight: 700, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h5" sx={{ mb: 4, fontWeight: 700, color: '#d97534', display: 'flex', alignItems: 'center', gap: 1 }}>
               <Security />
               Account Settings
             </Typography>
 
             {/* Security Section */}
-            <Card sx={{ mb: 3, bgcolor: 'rgba(255, 255, 255, 0.95)' }}>
+            <Card sx={{ mb: 3, bgcolor: 'rgba(30,41,64,0.85)' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                   <Box sx={{ 
@@ -599,7 +606,7 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                   }}>
                     <Security sx={{ color: '#ff9800', fontSize: 28 }} />
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#000000' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#e8dcc4' }}>
                     Security
                   </Typography>
                 </Box>
@@ -607,8 +614,8 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                 {/* Change Password */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Security sx={{ color: '#666666' }} />
-                    <Typography sx={{ fontWeight: 500, color: '#000000' }}>
+                    <Security sx={{ color: 'rgba(232,220,196,0.6)' }} />
+                    <Typography sx={{ fontWeight: 500, color: '#e8dcc4' }}>
                       Change Password
                     </Typography>
                   </Box>
@@ -628,12 +635,12 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
-                      {profileVisibility ? <Visibility sx={{ color: '#666666' }} /> : <VisibilityOff sx={{ color: '#666666' }} />}
-                      <Typography sx={{ fontWeight: 500, color: '#000000' }}>
+                      {profileVisibility ? <Visibility sx={{ color: 'rgba(232,220,196,0.6)' }} /> : <VisibilityOff sx={{ color: 'rgba(232,220,196,0.6)' }} />}
+                      <Typography sx={{ fontWeight: 500, color: '#e8dcc4' }}>
                         Profile Visibility
                       </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ color: '#666666', ml: 5 }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.6)', ml: 5 }}>
                       Make your profile visible to others
                     </Typography>
                   </Box>
@@ -648,9 +655,9 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
 
             {/* Change Password Form (expanded) */}
             {showPasswordForm && (
-              <Card sx={{ mb: 3, bgcolor: 'rgba(255, 255, 255, 0.95)' }}>
+              <Card sx={{ mb: 3, bgcolor: 'rgba(30,41,64,0.85)' }}>
                 <CardContent>
-                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#000000' }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#e8dcc4' }}>
                     Change Password
                   </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -660,9 +667,9 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                     type={showPassword.current ? 'text' : 'password'}
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange('currentPassword')}
-                    InputLabelProps={{ sx: { color: '#000000' } }}
+                    InputLabelProps={{ sx: { color: '#e8dcc4' } }}
                     InputProps={{
-                      sx: { color: '#000000' },
+                      sx: { color: '#e8dcc4' },
                       endAdornment: (
                         <IconButton
                           onClick={() => setShowPassword(prev => ({ ...prev, current: !prev.current }))}
@@ -679,9 +686,9 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                       type={showPassword.new ? 'text' : 'password'}
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange('newPassword')}
-                      InputLabelProps={{ sx: { color: '#000000' } }}
+                      InputLabelProps={{ sx: { color: '#e8dcc4' } }}
                       InputProps={{
-                        sx: { color: '#000000' },
+                        sx: { color: '#e8dcc4' },
                         endAdornment: (
                           <IconButton
                             onClick={() => setShowPassword(prev => ({ ...prev, new: !prev.new }))}
@@ -697,9 +704,9 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                       type={showPassword.confirm ? 'text' : 'password'}
                       value={passwordData.confirmPassword}
                       onChange={handlePasswordChange('confirmPassword')}
-                      InputLabelProps={{ sx: { color: '#000000' } }}
+                      InputLabelProps={{ sx: { color: '#e8dcc4' } }}
                       InputProps={{
-                        sx: { color: '#000000' },
+                        sx: { color: '#e8dcc4' },
                         endAdornment: (
                           <IconButton
                             onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
@@ -726,7 +733,7 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
             )}
 
             {/* Delete Account Section - Danger Zone */}
-            <Card sx={{ bgcolor: 'rgba(255, 235, 238, 1)', border: '2px solid #ef5350' }}>
+            <Card sx={{ bgcolor: 'rgba(60,10,10,0.9)', border: '2px solid rgba(239,83,80,0.6)' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                   <Box sx={{ 
@@ -743,7 +750,7 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                     Danger Zone
                   </Typography>
                 </Box>
-                <Typography variant="body2" sx={{ mb: 2, color: '#666666' }}>
+                <Typography variant="body2" sx={{ mb: 2, color: 'rgba(232,220,196,0.6)' }}>
                   These actions cannot be undone. Please proceed with caution.
                 </Typography>
                 <TextField
@@ -752,8 +759,8 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                   value={deleteConfirm}
                   onChange={(e) => setDeleteConfirm(e.target.value)}
                   sx={{ mb: 2 }}
-                  InputLabelProps={{ sx: { color: '#000000' } }}
-                  InputProps={{ sx: { color: '#000000' } }}
+                  InputLabelProps={{ sx: { color: '#e8dcc4' } }}
+                  InputProps={{ sx: { color: '#e8dcc4' } }}
                 />
                 <Button
                   variant="outlined"
@@ -778,12 +785,12 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
 
           {/* Notifications Tab */}
           <TabPanel value={tabValue} index={3}>
-            <Typography variant="h5" sx={{ mb: 4, fontWeight: 700, color: '#1976d2', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h5" sx={{ mb: 4, fontWeight: 700, color: '#d97534', display: 'flex', alignItems: 'center', gap: 1 }}>
               <NotificationsIcon />
               Account Settings
             </Typography>
             
-            <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.95)' }}>
+            <Card sx={{ bgcolor: 'rgba(30,41,64,0.85)' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                   <Box sx={{ 
@@ -796,7 +803,7 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                   }}>
                     <NotificationsIcon sx={{ color: '#ffc107', fontSize: 28 }} />
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#000000' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#e8dcc4' }}>
                     Notifications
                   </Typography>
                 </Box>
@@ -805,12 +812,12 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
-                      <NotificationsIcon sx={{ color: '#666666' }} />
-                      <Typography sx={{ fontWeight: 500, color: '#000000' }}>
+                      <NotificationsIcon sx={{ color: 'rgba(232,220,196,0.6)' }} />
+                      <Typography sx={{ fontWeight: 500, color: '#e8dcc4' }}>
                         Email Notifications
                       </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ color: '#666666', ml: 5 }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.6)', ml: 5 }}>
                       Receive updates via email
                     </Typography>
                   </Box>
@@ -827,12 +834,12 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0.5 }}>
-                      <NotificationsIcon sx={{ color: '#666666' }} />
-                      <Typography sx={{ fontWeight: 500, color: '#000000' }}>
+                      <NotificationsIcon sx={{ color: 'rgba(232,220,196,0.6)' }} />
+                      <Typography sx={{ fontWeight: 500, color: '#e8dcc4' }}>
                         Assignment Reminders
                       </Typography>
                     </Box>
-                    <Typography variant="body2" sx={{ color: '#666666', ml: 5 }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.6)', ml: 5 }}>
                       Get reminded about deadlines
                     </Typography>
                   </Box>
@@ -859,8 +866,8 @@ const EnhancedSettings: React.FC<EnhancedSettingsProps> = ({ open, onClose }) =>
           </TabPanel>
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, borderTop: 1, borderColor: 'divider' }}>
-          <Button onClick={onClose} sx={{ fontWeight: 600, color: '#666666' }}>
+        <DialogActions sx={{ p: 3, borderTop: '1px solid rgba(255,255,255,0.08)', bgcolor: '#0f1923' }}>
+          <Button onClick={onClose} sx={{ fontWeight: 600, color: '#e8dcc4', '&:hover': { bgcolor: 'rgba(217,117,52,0.1)' } }}>
             Close
           </Button>
         </DialogActions>

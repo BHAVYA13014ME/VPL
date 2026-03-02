@@ -132,7 +132,7 @@ const AdminUsers: React.FC = () => {
       };
 
       await axios.put(
-        `http://localhost:5000/api/users/${selectedUser._id}`,
+        `/api/users/${selectedUser._id}`,
         updateData,
         {
           headers: { Authorization: `Bearer ${token}` }

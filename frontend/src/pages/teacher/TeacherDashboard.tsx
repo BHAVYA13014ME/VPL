@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Button,
   Tooltip,
+  LinearProgress,
 } from '@mui/material';
 import {
   Assignment,
@@ -21,12 +22,26 @@ import {
   MenuBook,
   EmojiEvents,
   Refresh as RefreshIcon,
+  School,
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
-import '../../styles/PremiumDashboard.css';
-import '../../styles/themes.css';
+
+const CARD  = 'rgba(30,41,64,0.85)';
+const BORDER = 'rgba(255,255,255,0.08)';
+const TEXT  = '#e8dcc4';
+const MUTED = 'rgba(232,220,196,0.6)';
+const ACCENT = '#d97534';
+
+const cardSx = {
+  bgcolor: CARD,
+  border: `1px solid ${BORDER}`,
+  borderRadius: 3,
+  backdropFilter: 'blur(12px)',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
+  p: 3,
+};
 
 interface TeacherStats {
   totalCourses: number;
@@ -66,7 +81,6 @@ const TeacherDashboardHome: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
-  // Safe function to get user initials
   const getUserInitials = () => {
     if (!user) return 'T';
     if (user.firstName && typeof user.firstName === 'string' && user.firstName.length > 0) {
@@ -78,25 +92,15 @@ const TeacherDashboardHome: React.FC = () => {
     return 'T';
   };
 
-  // Safe function to get user display name
   const getUserDisplayName = () => {
     if (!user) return 'Teacher';
-    if (user.fullName && typeof user.fullName === 'string') {
-      return user.fullName;
-    }
-    if (user.firstName && user.lastName) {
-      return `${user.firstName} ${user.lastName}`;
-    }
-    if (user.firstName) {
-      return user.firstName;
-    }
-    if (user.email) {
-      return user.email;
-    }
+    if (user.fullName && typeof user.fullName === 'string') return user.fullName;
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName}`;
+    if (user.firstName) return user.firstName;
+    if (user.email) return user.email;
     return 'Teacher';
   };
 
-  // Safe percentage calculation helper
   const safePercentage = (value: number | undefined, max: number): number => {
     const numValue = value ?? 0;
     if (!max || max === 0) return 0;
@@ -106,15 +110,10 @@ const TeacherDashboardHome: React.FC = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
+      if (!token) { setLoading(false); return; }
       const response = await axios.get('/api/dashboard/teacher', {
         headers: { Authorization: `Bearer ${token}` }
       });
-
       if (response.data.success) {
         setDashboardData(response.data.data);
         setLastUpdated(new Date());
@@ -126,464 +125,213 @@ const TeacherDashboardHome: React.FC = () => {
     }
   };
 
-  // Initial fetch and auto-refresh every 30 seconds
   useEffect(() => {
     fetchDashboardData();
-    
-    const interval = setInterval(() => {
-      fetchDashboardData();
-    }, 30000);
-
+    const interval = setInterval(fetchDashboardData, 30000);
     return () => clearInterval(interval);
   }, []);
 
   if (loading) {
     return (
-      <div className="premium-dashboard themed-container">
-        <Layout title="Teacher Dashboard">
-          <Container maxWidth="xl" sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-            <CircularProgress sx={{ color: '#4facfe' }} />
-          </Container>
-        </Layout>
-      </div>
+      <Layout title="Teacher Dashboard">
+        <Container maxWidth="xl" sx={{ py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+          <CircularProgress sx={{ color: ACCENT }} />
+        </Container>
+      </Layout>
     );
   }
 
-  const stats = dashboardData?.stats || { 
-    totalStudents: 0, 
-    totalCourses: 0, 
-    totalAssignments: 0, 
-    avgRating: 0
-  };
-
-  // Calculate engagement rate based on real data
+  const stats = dashboardData?.stats || { totalStudents: 0, totalCourses: 0, totalAssignments: 0, avgRating: 0 };
   const engagementRate = stats.totalStudents > 0 ? Math.min(Math.round((stats.totalStudents / 200) * 100), 100) : 0;
+  const completionRate = stats.totalAssignments > 0 ? 75 : 0;
 
-  const recentActivity = dashboardData?.recentActivity && Array.isArray(dashboardData.recentActivity) && dashboardData.recentActivity.length > 0 
-    ? dashboardData.recentActivity 
+  const recentActivity = dashboardData?.recentActivity && Array.isArray(dashboardData.recentActivity) && dashboardData.recentActivity.length > 0
+    ? dashboardData.recentActivity
     : [
-        {
-          _id: '1',
-          type: 'submission',
-          title: 'Assignment Submitted',
-          description: 'John Doe submitted "React Hooks Assignment"',
-          course: { title: 'React Development' },
-          timestamp: new Date(),
-        },
-        {
-          _id: '2',
-          type: 'discussion',
-          title: 'New Discussion Reply',
-          description: 'Sarah asked a question in "JavaScript Fundamentals"',
-          course: { title: 'JavaScript Course' },
-          timestamp: new Date(),
-        },
-        {
-          _id: '3',
-          type: 'enrollment',
-          title: 'New Student Enrollment',
-          description: 'Mike Johnson enrolled in your course',
-          course: { title: 'Database Design' },
-          timestamp: new Date(),
-        },
+        { _id: '1', type: 'submission', title: 'Assignment Submitted', description: 'John Doe submitted "React Hooks Assignment"', course: { title: 'React Development' }, timestamp: new Date() },
+        { _id: '2', type: 'discussion', title: 'New Discussion Reply', description: 'Sarah asked a question in "JavaScript Fundamentals"', course: { title: 'JavaScript Course' }, timestamp: new Date() },
+        { _id: '3', type: 'enrollment', title: 'New Student Enrollment', description: 'Mike Johnson enrolled in your course', course: { title: 'Database Design' }, timestamp: new Date() },
       ];
 
-  // Calculate completion rate based on total assignments (placeholder)
-  const completionRate = stats.totalAssignments > 0 ? 75 : 0; // Placeholder until backend provides completion data
-
-  // Handle activity item click - navigate to relevant section
   const handleActivityClick = (activity: ActivityItem) => {
     switch (activity.type) {
-      case 'submission':
-        navigate('/assignments');
-        break;
-      case 'discussion':
-        navigate('/chat');
-        break;
-      case 'enrollment':
-        navigate('/courses');
-        break;
-      default:
-        navigate('/teacher');
+      case 'submission': navigate('/assignments'); break;
+      case 'discussion': navigate('/chat'); break;
+      case 'enrollment': navigate('/courses'); break;
+      default: navigate('/teacher');
     }
   };
 
-  // Navigate to detailed analytics
-  const handleViewAnalytics = () => {
-    navigate('/analytics');
-  };
+  const statCards = [
+    { icon: <People sx={{ color: '#4facfe', fontSize: 36 }} />, value: stats.totalStudents, label: 'Total Students', max: 200, onClick: () => navigate('/courses') },
+    { icon: <MenuBook sx={{ color: '#f093fb', fontSize: 36 }} />, value: stats.totalCourses, label: 'Active Courses', max: 15, onClick: () => navigate('/courses') },
+    { icon: <Assignment sx={{ color: '#ffd700', fontSize: 36 }} />, value: stats.totalAssignments, label: 'Assignments', max: 50, onClick: () => navigate('/assignments') },
+    { icon: <TrendingUp sx={{ color: ACCENT, fontSize: 36 }} />, value: `${engagementRate}%`, label: 'Engagement Rate', pct: engagementRate, onClick: () => navigate('/analytics') },
+  ];
 
   return (
-    <div className="premium-dashboard themed-container">
-      <Layout title="Teacher Dashboard">
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-          {/* Welcome Section with Refresh Button */}
-          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 2 }}>
-            <div className="welcome-section themed-card" style={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <div className="welcome-avatar">
-                  <Avatar
-                    src={user?.profile?.profilePicture}
-                    sx={{ width: 80, height: 80 }}
-                  >
-                    {getUserInitials()}
-                  </Avatar>
-                </div>
-                <Box sx={{ flex: 1 }}>
-                  <Typography className="premium-title-light text-enhanced themed-text-primary">
-                    Welcome Back, {getUserDisplayName()}!
-                  </Typography>
-                  <Typography className="premium-subtitle-light themed-text-secondary">
-                    Ready to inspire minds today? Your students are waiting for your guidance! 🎓
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                    Last updated: {lastUpdated.toLocaleTimeString()} (Auto-refreshes every 30s)
-                  </Typography>
-                </Box>
+    <Layout title="Teacher Dashboard">
+      <Box sx={{ minHeight: '100vh', bgcolor: '#111827', py: 4 }}>
+        <Container maxWidth="xl">
+
+          {/* Welcome Banner */}
+          <Box sx={{ mb: 4, display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+            <Box sx={{ ...cardSx, flex: 1, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <Avatar
+                src={user?.profile?.profilePicture}
+                sx={{ width: 72, height: 72, bgcolor: ACCENT, fontSize: '1.8rem', border: `3px solid ${ACCENT}` }}
+              >
+                {getUserInitials()}
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h4" sx={{ color: TEXT, fontWeight: 700, mb: 0.5 }}>
+                  Welcome Back, {getUserDisplayName()}!
+                </Typography>
+                <Typography sx={{ color: MUTED, mb: 1 }}>
+                  Ready to inspire minds today? Your students are waiting for your guidance!
+                </Typography>
+                <Typography variant="caption" sx={{ color: MUTED }}>
+                  Last updated: {lastUpdated.toLocaleTimeString()} · Auto-refreshes every 30s
+                </Typography>
               </Box>
-            </div>
-            <Tooltip title="Refresh data now">
-              <span>
-                <IconButton 
-                  onClick={fetchDashboardData} 
-                  disabled={loading}
-                  sx={{ 
-                    bgcolor: 'primary.main', 
-                    color: 'white',
-                    '&:hover': { bgcolor: 'primary.dark' },
-                    mt: 2
-                  }}
-                >
-                  {loading ? <CircularProgress size={24} color="inherit" /> : <RefreshIcon />}
-                </IconButton>
-              </span>
+              <Chip
+                icon={<School sx={{ color: `${ACCENT} !important` }} />}
+                label="Educator"
+                sx={{ bgcolor: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}44`, fontWeight: 600 }}
+              />
+            </Box>
+            <Tooltip title="Refresh data">
+              <IconButton
+                onClick={fetchDashboardData}
+                disabled={loading}
+                sx={{ bgcolor: `${ACCENT}22`, color: ACCENT, border: `1px solid ${ACCENT}44`, mt: 1, '&:hover': { bgcolor: `${ACCENT}33` } }}
+              >
+                {loading ? <CircularProgress size={22} sx={{ color: ACCENT }} /> : <RefreshIcon />}
+              </IconButton>
             </Tooltip>
           </Box>
 
-          {/* Stats Cards */}
-          <Box sx={{ 
-            display: 'grid', 
-            gridTemplateColumns: { 
-              xs: '1fr', 
-              sm: 'repeat(2, 1fr)', 
-              md: 'repeat(4, 1fr)' 
-            }, 
-            gap: 3, 
-            mb: 4 
-          }}>
-            <div 
-              className="stats-card card-content-enhanced themed-card"
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/courses')}
-              title="Click to view courses"
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <People className="animated-icon" sx={{ color: '#4facfe', fontSize: 40 }} />
+          {/* Stat Cards */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2,1fr)', md: 'repeat(4,1fr)' }, gap: 3, mb: 4 }}>
+            {statCards.map((card, i) => (
+              <Box
+                key={i}
+                onClick={card.onClick}
+                sx={{ ...cardSx, cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'translateY(-4px)', boxShadow: `0 12px 40px rgba(0,0,0,0.5)` } }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.06)' }}>{card.icon}</Box>
+                  <Box>
+                    <Typography variant="h4" sx={{ color: TEXT, fontWeight: 700, lineHeight: 1.1 }}>
+                      {card.value}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: MUTED }}>{card.label}</Typography>
+                  </Box>
+                </Box>
                 <Box>
-                  <Typography className="stats-number" variant="h4">
-                    {stats.totalStudents}
-                  </Typography>
-                  <Typography className="stats-label" variant="body2">
-                    Total Students
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="caption" sx={{ color: MUTED }}>Progress</Typography>
+                    <Typography variant="caption" sx={{ color: ACCENT }}>
+                      {typeof card.pct !== 'undefined' ? card.pct : safePercentage(typeof card.value === 'number' ? card.value : 0, card.max || 100)}%
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={typeof card.pct !== 'undefined' ? card.pct : safePercentage(typeof card.value === 'number' ? card.value : 0, card.max || 100)}
+                    sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.08)', '& .MuiLinearProgress-bar': { bgcolor: ACCENT, borderRadius: 3 } }}
+                  />
                 </Box>
               </Box>
-              <div className="progress-container">
-                <div className="progress-label">
-                  <span>Progress</span>
-                  <span className="progress-percentage">
-                    {safePercentage(stats.totalStudents, 200).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${safePercentage(stats.totalStudents, 200)}%` }}
-                    role="progressbar"
-                    aria-valuenow={safePercentage(stats.totalStudents, 200)}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label="Student enrollment progress"
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <div 
-              className="stats-card card-content-enhanced"
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/courses')}
-              title="Click to view courses"
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <MenuBook className="animated-icon" sx={{ color: '#f093fb', fontSize: 40 }} />
-                <Box>
-                  <Typography className="stats-number" variant="h4">
-                    {stats.totalCourses}
-                  </Typography>
-                  <Typography className="stats-label" variant="body2">
-                    Active Courses
-                  </Typography>
-                </Box>
-              </Box>
-              <div className="progress-container">
-                <div className="progress-label">
-                  <span>Progress</span>
-                  <span className="progress-percentage">
-                    {safePercentage(stats.totalCourses, 15).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${safePercentage(stats.totalCourses, 15)}%` }}
-                    role="progressbar"
-                    aria-valuenow={safePercentage(stats.totalCourses, 15)}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label="Course creation progress"
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <div 
-              className="stats-card card-content-enhanced"
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/assignments')}
-              title="Click to view assignments"
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <Assignment className="animated-icon" sx={{ color: '#ffd700', fontSize: 40 }} />
-                <Box>
-                  <Typography className="stats-number" variant="h4">
-                    {stats.totalAssignments}
-                  </Typography>
-                  <Typography className="stats-label" variant="body2">
-                    Assignments
-                  </Typography>
-                </Box>
-              </Box>
-              <div className="progress-container">
-                <div className="progress-label">
-                  <span>Progress</span>
-                  <span className="progress-percentage">
-                    {safePercentage(stats.totalAssignments, 50).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${safePercentage(stats.totalAssignments, 50)}%` }}
-                    role="progressbar"
-                    aria-valuenow={safePercentage(stats.totalAssignments, 50)}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label="Assignment creation progress"
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            <div 
-              className="stats-card card-content-enhanced"
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate('/analytics')}
-              title="Click to view analytics"
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <TrendingUp className="animated-icon" sx={{ color: '#00f2fe', fontSize: 40 }} />
-                <Box>
-                  <Typography className="stats-number" variant="h4">
-                    {engagementRate}%
-                  </Typography>
-                  <Typography className="stats-label" variant="body2">
-                    Engagement Rate
-                  </Typography>
-                </Box>
-              </Box>
-              <div className="progress-container">
-                <div className="progress-label">
-                  <span>Progress</span>
-                  <span className="progress-percentage">{engagementRate}%</span>
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${engagementRate}%` }}
-                    role="progressbar"
-                    aria-valuenow={engagementRate}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label="Student engagement progress"
-                  ></div>
-                </div>
-              </div>
-            </div>
+            ))}
           </Box>
 
-          {/* Recent Activity & Teaching Insights */}
-          <Box sx={{ 
-            display: 'grid', 
-            gridTemplateColumns: { 
-              xs: '1fr', 
-              md: '2fr 1fr' 
-            }, 
-            gap: 3 
-          }}>
-            <div className="glass-card dashboard-section" style={{ padding: '24px' }}>
-              <Typography className="premium-heading" variant="h5" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Notifications className="animated-icon" sx={{ color: '#f093fb' }} />
+          {/* Activity + Insights */}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' }, gap: 3 }}>
+
+            {/* Recent Activity */}
+            <Box sx={cardSx}>
+              <Typography variant="h6" sx={{ color: TEXT, fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Notifications sx={{ color: '#f093fb' }} />
                 Recent Activity
               </Typography>
-              <div className="activity-list">
-                {Array.isArray(recentActivity) && recentActivity.length > 0 ? (
-                  recentActivity.map((activity) => (
-                    <div 
-                      key={activity._id || Math.random()} 
-                      className="activity-item"
-                      style={{ cursor: 'pointer' }}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                {recentActivity.map((activity) => {
+                  const iconMap: Record<string, React.ReactNode> = {
+                    submission: <Assignment sx={{ fontSize: 18 }} />,
+                    discussion: <Chat sx={{ fontSize: 18 }} />,
+                    enrollment: <People sx={{ fontSize: 18 }} />,
+                  };
+                  return (
+                    <Box
+                      key={activity._id || Math.random()}
                       onClick={() => handleActivityClick(activity)}
+                      sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1.5, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background 0.2s', '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' } }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar sx={{ bgcolor: 'rgba(79, 172, 254, 0.2)', color: '#4facfe' }}>
-                          {activity.type === 'submission' ? <Assignment /> : 
-                           activity.type === 'discussion' ? <Chat /> : <People />}
-                        </Avatar>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography className="activity-title" variant="subtitle1">
-                            {activity.title || 'Unknown Activity'}
-                          </Typography>
-                          <Typography className="activity-description" variant="body2">
-                            {activity.description || 'No description available'}
-                          </Typography>
-                          {activity.course && (
-                            <Chip 
-                              label={activity.course.title || 'Unknown Course'} 
-                              size="small" 
-                              className="premium-chip"
-                              sx={{ mt: 0.5 }}
-                            />
-                          )}
-                        </Box>
-                        <IconButton 
-                          className="animated-icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleActivityClick(activity);
-                          }}
-                          title="View details"
-                        >
-                          <PlayArrow sx={{ color: 'rgba(255, 255, 255, 0.7)' }} />
-                        </IconButton>
+                      <Avatar sx={{ bgcolor: 'rgba(217,117,52,0.15)', color: ACCENT, width: 38, height: 38 }}>
+                        {iconMap[activity.type] || <Notifications sx={{ fontSize: 18 }} />}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="subtitle2" sx={{ color: TEXT, fontWeight: 600 }}>{activity.title || 'Activity'}</Typography>
+                        <Typography variant="body2" sx={{ color: MUTED, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{activity.description}</Typography>
+                        {activity.course && (
+                          <Chip label={activity.course.title} size="small" sx={{ mt: 0.5, bgcolor: `${ACCENT}22`, color: ACCENT, fontSize: '0.7rem', height: 20 }} />
+                        )}
                       </Box>
-                    </div>
-                  ))
-                ) : (
-                  <Typography variant="body2" sx={{ textAlign: 'center', py: 3, color: 'rgba(255, 255, 255, 0.7)' }}>
-                    No recent activity to display
-                  </Typography>
-                )}
-              </div>
-            </div>
+                      <IconButton size="small" sx={{ color: MUTED, '&:hover': { color: ACCENT } }}>
+                        <PlayArrow fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
 
-            <div className="glass-card dashboard-section" style={{ padding: '24px' }}>
-              <Typography className="premium-text" variant="h5" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EmojiEvents className="animated-icon" sx={{ color: '#ffd700' }} />
+            {/* Teaching Insights */}
+            <Box sx={cardSx}>
+              <Typography variant="h6" sx={{ color: TEXT, fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <EmojiEvents sx={{ color: '#ffd700' }} />
                 Teaching Insights
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography className="premium-muted" variant="body2">
-                      Student Engagement
-                    </Typography>
-                    <Typography className="premium-text" variant="body2">
-                      92%
-                    </Typography>
+                {[
+                  { label: 'Student Engagement', value: 92 },
+                  { label: 'Assignment Completion', value: completionRate },
+                  { label: 'Average Rating', value: Math.round((stats.avgRating / 5) * 100), display: `${stats.avgRating.toFixed(1)} / 5.0` },
+                ].map((item, i) => (
+                  <Box key={i}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.75 }}>
+                      <Typography variant="body2" sx={{ color: MUTED }}>{item.label}</Typography>
+                      <Typography variant="body2" sx={{ color: ACCENT, fontWeight: 600 }}>{item.display || `${item.value}%`}</Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={item.value}
+                      sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.08)', '& .MuiLinearProgress-bar': { bgcolor: ACCENT, borderRadius: 3 } }}
+                    />
                   </Box>
-                  <div className="progress-container">
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: '92%' }}></div>
-                    </div>
-                  </div>
-                </Box>
-
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography className="premium-muted" variant="body2">
-                      Assignment Completion Rate
-                    </Typography>
-                    <Typography className="premium-text" variant="body2">
-                      {completionRate}%
-                    </Typography>
-                  </Box>
-                  <div className="progress-container">
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${completionRate}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </Box>
-
-                <Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography className="premium-muted" variant="body2">
-                      Average Rating
-                    </Typography>
-                    <Typography className="premium-text" variant="body2">
-                      {stats.avgRating.toFixed(1)} / 5.0
-                    </Typography>
-                  </Box>
-                  <div className="progress-container">
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${(stats.avgRating / 5) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </Box>
-
-                <Button 
+                ))}
+                <Button
                   variant="contained"
-                  className="premium-button" 
-                  onClick={handleViewAnalytics}
+                  onClick={() => navigate('/analytics')}
                   fullWidth
-                  sx={{ 
-                    marginTop: '16px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    color: 'white',
-                    textTransform: 'none',
-                    fontWeight: 'bold',
-                    py: 1.5,
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
-                    },
-                    transition: 'all 0.3s ease',
-                  }}
+                  sx={{ mt: 1, background: `linear-gradient(135deg, ${ACCENT}, #c06420)`, color: '#fff', textTransform: 'none', fontWeight: 600, py: 1.2, borderRadius: 2, '&:hover': { background: `linear-gradient(135deg, #c06420, ${ACCENT})`, transform: 'translateY(-2px)', boxShadow: `0 6px 20px ${ACCENT}55` }, transition: 'all 0.2s' }}
                 >
                   View Detailed Analytics
                 </Button>
               </Box>
-            </div>
+            </Box>
           </Box>
+
         </Container>
-      </Layout>
-    </div>
+      </Box>
+    </Layout>
   );
 };
 
-const TeacherDashboard: React.FC = () => {
-  return (
-    <Routes>
-      <Route index element={<TeacherDashboardHome />} />
-    </Routes>
-  );
-};
+const TeacherDashboard: React.FC = () => (
+  <Routes>
+    <Route index element={<TeacherDashboardHome />} />
+  </Routes>
+);
 
 export default TeacherDashboard;

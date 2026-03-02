@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -20,44 +20,87 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [isConnected, setIsConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
   const { user, token } = useAuth();
+  // Track current userId so we only reconnect on user change, not every token refresh
+  const connectedUserId = useRef<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    if (user && token) {
-      const newSocket = io('http://localhost:5000', {
-        auth: {
-          token: token
-        }
-      });
+    // Only create a new socket when user actually changes (not every token re-issue)
+    const userId = user?._id || null;
 
-      newSocket.on('connect', () => {
-        setIsConnected(true);
-        console.log('Connected to server');
-      });
-
-      newSocket.on('disconnect', () => {
+    if (!user || !token) {
+      // Logged out – close existing socket
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+        connectedUserId.current = null;
+        setSocket(null);
         setIsConnected(false);
-        console.log('Disconnected from server');
-      });
-
-      newSocket.on('userOnline', (userId: string) => {
-        setOnlineUsers(prev => [...prev.filter(id => id !== userId), userId]);
-      });
-
-      newSocket.on('userOffline', (userId: string) => {
-        setOnlineUsers(prev => prev.filter(id => id !== userId));
-      });
-
-      newSocket.on('onlineUsers', (users: string[]) => {
-        setOnlineUsers(users);
-      });
-
-      setSocket(newSocket);
-
-      return () => {
-        newSocket.close();
-      };
+      }
+      return;
     }
-  }, [user, token]);
+
+    // Already connected for this user — skip
+    if (connectedUserId.current === userId && socketRef.current?.connected) {
+      return;
+    }
+
+    // Close any existing socket before opening a new one
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+
+    const newSocket = io(process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000', {
+      auth: { token },
+      // Start with polling; upgrade to WebSocket after handshake —
+      // this avoids "WebSocket closed before connection established"
+      transports: ['polling', 'websocket'],
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+      timeout: 10000,
+    });
+
+    newSocket.on('connect', () => {
+      setIsConnected(true);
+      connectedUserId.current = userId;
+      console.log('Socket connected');
+    });
+
+    newSocket.on('disconnect', (reason) => {
+      setIsConnected(false);
+      console.log('Socket disconnected:', reason);
+    });
+
+    newSocket.on('connect_error', (err) => {
+      console.warn('Socket connect error:', err.message);
+      setIsConnected(false);
+    });
+
+    newSocket.on('userOnline', (userId: string) => {
+      setOnlineUsers(prev => [...prev.filter(id => id !== userId), userId]);
+    });
+
+    newSocket.on('userOffline', (userId: string) => {
+      setOnlineUsers(prev => prev.filter(id => id !== userId));
+    });
+
+    newSocket.on('onlineUsers', (users: string[]) => {
+      setOnlineUsers(users);
+    });
+
+    socketRef.current = newSocket;
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+      socketRef.current = null;
+      connectedUserId.current = null;
+    };
+  // Only reconnect when the actual user id changes, not token reference
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?._id]);
 
   const joinRoom = (roomId: string) => {
     if (socket) {

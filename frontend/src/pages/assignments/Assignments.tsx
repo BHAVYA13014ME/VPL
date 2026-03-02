@@ -277,13 +277,13 @@ const Assignments: React.FC = () => {
 
   const getAssignmentColor = (type: string) => {
     switch (type) {
-      case 'quiz': return '#e74c3c';
-      case 'assignment': return '#3498db';
-      case 'project': return '#2ecc71';
-      case 'exam': return '#f39c12';
-      case 'essay': return '#4caf50';
-      case 'code': return '#9c27b0';
-      default: return '#95a5a6';
+      case 'quiz': return '#c0392b';
+      case 'assignment': return '#1e4d7a';
+      case 'project': return '#1a5c3a';
+      case 'exam': return '#b85c1e';
+      case 'essay': return '#1a5c3a';
+      case 'code': return '#4a1a7a';
+      default: return '#2c3e50';
     }
   };
 
@@ -386,7 +386,7 @@ const Assignments: React.FC = () => {
           <Card 
             sx={{ 
               mb: 4, 
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #1a3a5c 0%, #d97534 100%)',
               color: 'white',
               overflow: 'visible'
             }}
@@ -561,9 +561,9 @@ const Assignments: React.FC = () => {
                         px: 4,
                         py: 1.5,
                         fontSize: '1.1rem',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #d97534 0%, #b85c1e 100%)',
                         '&:hover': {
-                          background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                          background: 'linear-gradient(135deg, #c06424 0%, #9a4d18 100%)',
                           transform: 'translateY(-2px)',
                         },
                         transition: 'all 0.3s ease'

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Typography,
   TextField,
   Button,
   Container,
-  Card,
-  CardContent,
   IconButton,
   InputAdornment,
   Alert,
@@ -19,6 +17,7 @@ import {
   DialogActions,
   Checkbox,
   FormControlLabel,
+  Link,
 } from '@mui/material';
 import {
   Visibility,
@@ -37,16 +36,11 @@ import axios from 'axios';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-
-  // Forgot Password Dialog
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
@@ -62,7 +56,6 @@ const Login: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       await login(formData.email, formData.password);
       navigate('/dashboard');
@@ -74,19 +67,14 @@ const Login: React.FC = () => {
   };
 
   const handleForgotPassword = async () => {
-    if (!forgotEmail) {
-      setForgotError('Please enter your email address');
-      return;
-    }
-
+    if (!forgotEmail) { setForgotError('Please enter your email address'); return; }
     setForgotLoading(true);
     setForgotError('');
-
     try {
       await axios.post('/api/auth/forgot-password', { email: forgotEmail });
       setForgotSuccess(true);
     } catch (err: any) {
-      setForgotError(err.response?.data?.error || 'Failed to send reset email. Please try again.');
+      setForgotError(err.response?.data?.error || 'Failed to send reset email.');
     } finally {
       setForgotLoading(false);
     }
@@ -100,391 +88,198 @@ const Login: React.FC = () => {
   };
 
   const handleGoogleLogin = () => {
-    // Redirect to backend OAuth route
-    const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
     window.location.href = `${backendUrl}/api/auth/google`;
   };
 
   const handleGitHubLogin = () => {
-    // Redirect to backend OAuth route
-    const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
     window.location.href = `${backendUrl}/api/auth/github`;
+  };
+
+  const fieldSx = {
+    mb: 2.5,
+    '& .MuiOutlinedInput-root': {
+      bgcolor: 'rgba(255,255,255,0.04)',
+      borderRadius: 2,
+      '& fieldset': { borderColor: 'rgba(255,255,255,0.12)' },
+      '&:hover fieldset': { borderColor: 'rgba(217,117,52,0.5)' },
+      '&.Mui-focused fieldset': { borderColor: '#d97534' },
+    },
+    '& .MuiInputLabel-root': { color: 'rgba(232,220,196,0.6)' },
+    '& .MuiInputLabel-root.Mui-focused': { color: '#d97534' },
+    '& input': { color: '#e8dcc4' },
+    '& .MuiInputAdornment-root svg': { color: 'rgba(232,220,196,0.45)' },
   };
 
   return (
     <Box sx={{
       minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #1a2332 0%, #2c3e50 30%, #34495e 60%, #1a2332 100%)',
-      py: 4,
-      position: 'relative',
-      overflow: 'hidden'
+      background: 'linear-gradient(135deg, #111827 0%, #1a2332 50%, #2c3e50 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      py: 4, position: 'relative', overflow: 'hidden',
     }}>
-      {/* Background Decorations */}
       <Box sx={{
-        position: 'absolute',
-        top: '10%',
-        left: '10%',
-        width: 300,
-        height: 300,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(211, 84, 0, 0.12) 0%, transparent 70%)',
-        filter: 'blur(40px)',
-        pointerEvents: 'none'
+        position: 'absolute', top: '20%', right: '15%', width: 400, height: 400,
+        background: 'radial-gradient(circle, rgba(217,117,52,0.12) 0%, transparent 70%)',
+        pointerEvents: 'none', filter: 'blur(60px)',
       }} />
       <Box sx={{
-        position: 'absolute',
-        bottom: '10%',
-        right: '10%',
-        width: 400,
-        height: 400,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(52, 73, 94, 0.4) 0%, transparent 70%)',
-        filter: 'blur(60px)',
-        pointerEvents: 'none'
+        position: 'absolute', bottom: '20%', left: '10%', width: 300, height: 300,
+        background: 'radial-gradient(circle, rgba(79,172,254,0.08) 0%, transparent 70%)',
+        pointerEvents: 'none', filter: 'blur(60px)',
       }} />
 
-      <Container maxWidth="sm">
-        <Card sx={{
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1, my: 4 }}>
+        <Box sx={{
+          bgcolor: 'rgba(30,41,64,0.85)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 4,
-          overflow: 'hidden'
+          borderRadius: 3,
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
+          p: { xs: 3, sm: 5 },
         }}>
-          <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-            {/* Logo */}
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <Box
-                onClick={() => navigate('/home')}
-                sx={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 3,
-                  background: 'linear-gradient(135deg, #d97534 0%, #c86329 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 2,
-                  cursor: 'pointer',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': { transform: 'scale(1.1)' }
-                }}
-              >
-                <SchoolIcon sx={{ color: 'white', fontSize: 32 }} />
-              </Box>
-              <Typography variant="h4" fontWeight="bold" color="white">
-                Welcome Back
-              </Typography>
-              <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', mt: 1 }}>
-                Sign in to continue your learning journey
-              </Typography>
-            </Box>
-
-            {error && (
-              <Alert severity="error" sx={{ mb: 3, bgcolor: 'rgba(211, 47, 47, 0.1)', color: '#f44336' }}>
-                {error}
-              </Alert>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                name="email"
-                label="Email Address"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                sx={{
-                  mb: 3,
-                  '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                    '&.Mui-focused fieldset': { borderColor: '#d97534' }
-                  },
-                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.6)' },
-                  '& .MuiInputLabel-root.Mui-focused': { color: '#d97534' }
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                    </InputAdornment>
-                  )
-                }}
-              />
-
-              <TextField
-                fullWidth
-                name="password"
-                label="Password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                required
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                    '&.Mui-focused fieldset': { borderColor: '#d97534' }
-                  },
-                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.6)' },
-                  '& .MuiInputLabel-root.Mui-focused': { color: '#d97534' }
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        sx={{ color: 'rgba(255,255,255,0.5)' }}
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-              />
-
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      sx={{
-                        color: 'rgba(255,255,255,0.5)',
-                        '&.Mui-checked': { color: '#d97534' }
-                      }}
-                    />
-                  }
-                  label={<Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>Remember me</Typography>}
-                />
-                <Button
-                  variant="text"
-                  onClick={() => setForgotOpen(true)}
-                  sx={{
-                    color: '#d97534',
-                    textTransform: 'none',
-                    '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' }
-                  }}
-                >
-                  Forgot Password?
-                </Button>
-              </Box>
-
-              <Button
-                fullWidth
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-                sx={{
-                  background: 'linear-gradient(135deg, #d97534 0%, #c86329 100%)',
-                  borderRadius: 2,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #c86329 0%, #b7551f 100%)',
-                  },
-                  '&:disabled': { opacity: 0.7 }
-                }}
-              >
-                {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Sign In'}
-              </Button>
-            </form>
-
-            <Divider sx={{ my: 4, '&::before, &::after': { borderColor: 'rgba(255,255,255,0.1)' } }}>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', px: 2 }}>
-                or continue with
-              </Typography>
-            </Divider>
-
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<GoogleIcon />}
-                onClick={handleGoogleLogin}
-                sx={{
-                  borderColor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  py: 1.5,
-                  '&:hover': { borderColor: 'rgba(255,255,255,0.4)', bgcolor: 'rgba(255,255,255,0.05)' }
-                }}
-              >
-                Google
-              </Button>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<GitHubIcon />}
-                onClick={handleGitHubLogin}
-                sx={{
-                  borderColor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  py: 1.5,
-                  '&:hover': { borderColor: 'rgba(255,255,255,0.4)', bgcolor: 'rgba(255,255,255,0.05)' }
-                }}
-              >
-                GitHub
-              </Button>
-            </Box>
-
-            <Typography
-              variant="body1"
-              sx={{ textAlign: 'center', mt: 4, color: 'rgba(255,255,255,0.6)' }}
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Box
+              onClick={() => navigate('/')}
+              sx={{
+                width: 56, height: 56, borderRadius: 2, mx: 'auto', mb: 2,
+                background: 'linear-gradient(135deg, #d97534, #c06420)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', boxShadow: '0 6px 20px rgba(217,117,52,0.4)',
+                transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' },
+              }}
             >
-              Don't have an account?{' '}
-              <Link
-                to="/signup"
-                style={{
-                  color: '#f39c12',
-                  textDecoration: 'none',
-                  fontWeight: 600
-                }}
-              >
-                Sign Up
-              </Link>
+              <SchoolIcon sx={{ color: '#fff', fontSize: 28 }} />
+            </Box>
+            <Typography variant="h4" fontWeight={700} sx={{ color: '#e8dcc4', mb: 0.5 }}>
+              Welcome Back
             </Typography>
-          </CardContent>
-        </Card>
+            <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.6)' }}>
+              Sign in to continue your learning journey
+            </Typography>
+          </Box>
+
+          {error && (
+            <Alert severity="error" sx={{
+              mb: 3, bgcolor: 'rgba(255,107,107,0.12)', color: '#ff8a8a',
+              border: '1px solid rgba(255,107,107,0.25)',
+              '& .MuiAlert-icon': { color: '#ff6b6b' },
+            }}>
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth name="email" label="Email Address" type="email"
+              value={formData.email} onChange={handleChange} required sx={fieldSx}
+              InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon /></InputAdornment> }}
+            />
+            <TextField
+              fullWidth name="password" label="Password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password} onChange={handleChange} required sx={fieldSx}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><LockIcon /></InputAdornment>,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(232,220,196,0.5)' }}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <FormControlLabel
+                control={<Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}
+                  sx={{ color: 'rgba(255,255,255,0.3)', '&.Mui-checked': { color: '#d97534' } }} />}
+                label={<Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.7)' }}>Remember me</Typography>}
+              />
+              <Button variant="text" onClick={() => setForgotOpen(true)}
+                sx={{ color: '#d97534', fontSize: '0.82rem', textTransform: 'none', p: 0, minWidth: 0,
+                  '&:hover': { bgcolor: 'transparent', textDecoration: 'underline' } }}>
+                Forgot Password?
+              </Button>
+            </Box>
+            <Button fullWidth type="submit" variant="contained" size="large" disabled={loading}
+              sx={{ py: 1.6, fontSize: '1rem', borderRadius: 2 }}>
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+            </Button>
+          </form>
+
+          <Divider sx={{ my: 3, borderColor: 'rgba(255,255,255,0.08)',
+            '&::before, &::after': { borderColor: 'rgba(255,255,255,0.08)' } }}>
+            <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.4)', px: 1, fontSize: '0.8rem' }}>
+              or continue with
+            </Typography>
+          </Divider>
+
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            {[
+              { label: 'Google', icon: <GoogleIcon />, action: handleGoogleLogin },
+              { label: 'GitHub', icon: <GitHubIcon />, action: handleGitHubLogin },
+            ].map(({ label, icon, action }) => (
+              <Button key={label} fullWidth variant="outlined" startIcon={icon} onClick={action}
+                sx={{
+                  py: 1.3, color: 'rgba(232,220,196,0.85)', borderColor: 'rgba(255,255,255,0.12)', borderRadius: 2,
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(217,117,52,0.5)' },
+                }}>
+                {label}
+              </Button>
+            ))}
+          </Box>
+
+          <Typography variant="body2" sx={{ textAlign: 'center', mt: 3.5, color: 'rgba(232,220,196,0.6)' }}>
+            Don't have an account?{' '}
+            <Link component={RouterLink} to="/signup" underline="hover"
+              sx={{ color: '#d97534', fontWeight: 700, '&:hover': { color: '#e8905a' } }}>
+              Sign Up
+            </Link>
+          </Typography>
+        </Box>
       </Container>
 
-      {/* Forgot Password Dialog */}
-      <Dialog
-        open={forgotOpen}
-        onClose={handleCloseForgot}
-        PaperProps={{
-          sx: {
-            background: 'linear-gradient(145deg, rgba(26, 26, 46, 0.98) 0%, rgba(15, 15, 35, 0.98) 100%)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 3,
-            minWidth: { xs: '90%', sm: 400 }
-          }
-        }}
-      >
-        <DialogTitle sx={{
-          color: 'white',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          pb: 1
-        }}>
+      <Dialog open={forgotOpen} onClose={handleCloseForgot} fullWidth maxWidth="xs"
+        PaperProps={{ sx: { bgcolor: '#1e2940', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, backgroundImage: 'none' } }}>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#e8dcc4' }}>
           {forgotSuccess ? 'Check Your Email' : 'Reset Password'}
-          <IconButton onClick={handleCloseForgot} sx={{ color: 'rgba(255,255,255,0.5)' }}>
-            <CloseIcon />
-          </IconButton>
+          <IconButton onClick={handleCloseForgot} sx={{ color: 'rgba(232,220,196,0.5)' }}><CloseIcon /></IconButton>
         </DialogTitle>
         <DialogContent>
           {forgotSuccess ? (
-            <Box sx={{ textAlign: 'center', py: 3 }}>
-              <Box sx={{
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                bgcolor: 'rgba(46, 204, 113, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mx: 'auto',
-                mb: 3
-              }}>
-                <CheckIcon sx={{ color: '#2ecc71', fontSize: 40 }} />
-              </Box>
-              <Typography variant="h6" color="white" gutterBottom>
-                Email Sent Successfully!
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                We've sent a password reset link to <strong style={{ color: '#f39c12' }}>{forgotEmail}</strong>.
-                Please check your inbox and follow the instructions.
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              <CheckIcon sx={{ fontSize: 48, mb: 2, color: '#51cf66' }} />
+              <Typography variant="body1" sx={{ color: '#e8dcc4' }}>
+                We have sent a reset link to <strong>{forgotEmail}</strong>.
               </Typography>
             </Box>
           ) : (
             <>
-              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', mb: 3 }}>
-                Enter your email address and we'll send you a link to reset your password.
+              <Typography variant="body2" sx={{ mb: 2, color: 'rgba(232,220,196,0.65)' }}>
+                Enter your email and we will send you a reset link.
               </Typography>
-
               {forgotError && (
-                <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(211, 47, 47, 0.1)', color: '#f44336' }}>
+                <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(255,107,107,0.1)', color: '#ff8a8a' }}>
                   {forgotError}
                 </Alert>
               )}
-
-              <TextField
-                fullWidth
-                label="Email Address"
-                type="email"
-                value={forgotEmail}
-                onChange={(e) => {
-                  setForgotEmail(e.target.value);
-                  setForgotError('');
-                }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                    '&.Mui-focused fieldset': { borderColor: '#f39c12' }
-                  },
-                  '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.6)' },
-                  '& .MuiInputLabel-root.Mui-focused': { color: '#f39c12' }
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                    </InputAdornment>
-                  )
-                }}
+              <TextField fullWidth label="Email Address" type="email" value={forgotEmail}
+                onChange={(e) => { setForgotEmail(e.target.value); setForgotError(''); }} sx={fieldSx}
+                InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon /></InputAdornment> }}
               />
             </>
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           {forgotSuccess ? (
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={handleCloseForgot}
-              sx={{
-                background: 'linear-gradient(135deg, #d97534 0%, #c86329 100%)',
-                borderRadius: 2,
-                py: 1.5
-              }}
-            >
-              Done
-            </Button>
+            <Button fullWidth variant="contained" onClick={handleCloseForgot}>Done</Button>
           ) : (
             <>
-              <Button onClick={handleCloseForgot} sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleForgotPassword}
-                disabled={forgotLoading}
-                sx={{
-                  background: 'linear-gradient(135deg, #d97534 0%, #c86329 100%)',
-                  borderRadius: 2,
-                  px: 3
-                }}
-              >
-                {forgotLoading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : 'Send Reset Link'}
+              <Button onClick={handleCloseForgot} sx={{ color: 'rgba(232,220,196,0.6)' }}>Cancel</Button>
+              <Button variant="contained" onClick={handleForgotPassword} disabled={forgotLoading}>
+                {forgotLoading ? <CircularProgress size={20} color="inherit" /> : 'Send Reset Link'}
               </Button>
             </>
           )}

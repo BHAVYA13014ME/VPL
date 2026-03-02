@@ -34,26 +34,8 @@ const themeOptions: ThemeOption[] = [
     value: 'dark',
     label: 'Dark',
     icon: <DarkModeIcon />,
-    description: 'Easy on the eyes'
+    description: 'Navy & orange — easy on the eyes'
   },
-  {
-    value: 'blue',
-    label: 'Ocean Blue',
-    icon: <GradientIcon />,
-    description: 'Cool blue gradient'
-  },
-  {
-    value: 'purple',
-    label: 'Purple Dream',
-    icon: <GradientIcon />,
-    description: 'Elegant purple tones'
-  },
-  {
-    value: 'green',
-    label: 'Nature Green',
-    icon: <GradientIcon />,
-    description: 'Fresh green gradient'
-  }
 ];
 
 interface ThemeSwitcherProps {

@@ -61,7 +61,7 @@ const ResetPassword: React.FC = () => {
     setError('');
 
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+      await axios.post('/api/auth/forgot-password', { email });
       setSuccess(true);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to send reset email. Please try again.');
@@ -92,7 +92,7 @@ const ResetPassword: React.FC = () => {
     setError('');
 
     try {
-      await axios.post('http://localhost:5000/api/auth/reset-password', { 
+      await axios.post('/api/auth/reset-password', { 
         token, 
         password 
       });

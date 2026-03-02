@@ -286,18 +286,21 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
           elevation: 0,
           sx: {
             overflow: 'visible',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-            background: 'rgba(255, 255, 255, 0.95)',
+            filter: 'drop-shadow(0px 4px 24px rgba(0,0,0,0.6))',
+            background: '#1a2640',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
+            border: '1px solid rgba(217,117,52,0.25)',
             borderRadius: '16px',
             mt: 1.5,
-            minWidth: 200,
+            minWidth: 220,
             '& .MuiAvatar-root': {
               width: 32,
               height: 32,
               ml: -0.5,
               mr: 1,
+            },
+            '& .MuiMenuItem-root': {
+              color: '#e8dcc4',
             },
             '&:before': {
               content: '""',
@@ -307,9 +310,12 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
               right: 14,
               width: 10,
               height: 10,
-              bgcolor: 'rgba(255, 255, 255, 0.95)',
+              bgcolor: '#1a2640',
               transform: 'translateY(-50%) rotate(45deg)',
               zIndex: 0,
+              border: '1px solid rgba(217,117,52,0.25)',
+              borderBottom: 'none',
+              borderRight: 'none',
             },
           },
         }}
@@ -317,7 +323,7 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         {/* User Info Header */}
-        <Box sx={{ px: 2, py: 1.5, background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', borderRadius: '12px 12px 0 0' }}>
+        <Box sx={{ px: 2, py: 1.5, background: 'linear-gradient(135deg, #d97534 0%, #b85c1e 100%)', color: 'white', borderRadius: '12px 12px 0 0' }}>
           <Typography variant="subtitle2" fontWeight="bold">
             {getUserDisplayName()}
           </Typography>
@@ -344,18 +350,19 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
           sx={{
             py: 1.5,
             px: 2,
+            color: '#e8dcc4',
             '&:hover': {
-              background: 'rgba(79, 172, 254, 0.1)',
+              background: 'rgba(217, 117, 52, 0.15)',
               transform: 'translateX(4px)',
             },
             transition: 'all 0.2s ease',
           }}
         >
-          <ListItemIcon sx={{ color: '#4facfe' }}>
+          <ListItemIcon sx={{ color: '#d97534' }}>
             <Person fontSize="small" />
           </ListItemIcon>
           <ListItemText>
-            <Typography variant="body2" fontWeight="500">View Profile</Typography>
+            <Typography variant="body2" fontWeight="500" color="#e8dcc4">View Profile</Typography>
           </ListItemText>
         </MenuItem>
 
@@ -364,30 +371,32 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
           sx={{
             py: 1.5,
             px: 2,
+            color: '#e8dcc4',
             '&:hover': {
-              background: 'rgba(79, 172, 254, 0.1)',
+              background: 'rgba(217, 117, 52, 0.15)',
               transform: 'translateX(4px)',
             },
             transition: 'all 0.2s ease',
           }}
         >
-          <ListItemIcon sx={{ color: '#4facfe' }}>
+          <ListItemIcon sx={{ color: '#d97534' }}>
             <Settings fontSize="small" />
           </ListItemIcon>
           <ListItemText>
-            <Typography variant="body2" fontWeight="500">Settings</Typography>
+            <Typography variant="body2" fontWeight="500" color="#e8dcc4">Settings</Typography>
           </ListItemText>
         </MenuItem>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.08)' }} />
 
         <MenuItem 
           onClick={handleLogoutClick}
           sx={{
             py: 1.5,
             px: 2,
+            color: '#e8dcc4',
             '&:hover': {
-              background: 'rgba(255, 107, 107, 0.1)',
+              background: 'rgba(255, 107, 107, 0.12)',
               transform: 'translateX(4px)',
             },
             transition: 'all 0.2s ease',
@@ -411,11 +420,12 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
           elevation: 0,
           sx: {
             overflow: 'visible',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            filter: 'drop-shadow(0px 4px 24px rgba(0,0,0,0.6))',
             mt: 1.5,
             minWidth: 320,
             borderRadius: '12px',
-            background: 'rgba(255, 255, 255, 0.95)',
+            background: '#1a2640',
+            border: '1px solid rgba(217,117,52,0.25)',
             backdropFilter: 'blur(10px)',
             '& .MuiAvatar-root': {
               width: 32,
@@ -431,9 +441,12 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({
               right: 14,
               width: 10,
               height: 10,
-              bgcolor: 'rgba(255, 255, 255, 0.95)',
+              bgcolor: '#1a2640',
               transform: 'translateY(-50%) rotate(45deg)',
               zIndex: 0,
+              border: '1px solid rgba(217,117,52,0.25)',
+              borderBottom: 'none',
+              borderRight: 'none',
             },
           },
         }}

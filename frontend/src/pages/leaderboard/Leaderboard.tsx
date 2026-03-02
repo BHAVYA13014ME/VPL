@@ -298,7 +298,7 @@ const Leaderboard: React.FC = () => {
         {/* Modern Header with Gradient */}
         <Box
           sx={{
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            background: 'linear-gradient(135deg, #1a3a5c 0%, #d97534 100%)',
             borderRadius: 4,
             p: 4,
             mb: 4,
@@ -383,7 +383,7 @@ const Leaderboard: React.FC = () => {
 
         {/* User Ranking Card */}
         {userRanking && (
-          <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+          <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #1a2640 0%, #253860 100%)', color: 'white', border: '1px solid rgba(217,117,52,0.3)' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>Your Ranking</Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
@@ -445,8 +445,8 @@ const Leaderboard: React.FC = () => {
                 fontWeight: 600,
                 fontSize: '1rem',
                 '&.Mui-selected': {
-                  bgcolor: alpha('#f093fb', 0.1),
-                  color: '#f093fb'
+                  bgcolor: 'rgba(217,117,52,0.15)',
+                  color: '#d97534'
                 }
               }
             }}
@@ -477,7 +477,7 @@ const Leaderboard: React.FC = () => {
               <TableHead>
                 <TableRow 
                   sx={{ 
-                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    background: 'linear-gradient(135deg, #1e3a5f 0%, #d97534 100%)',
                     '& .MuiTableCell-head': {
                       color: 'white',
                       fontWeight: 'bold',
@@ -506,10 +506,10 @@ const Leaderboard: React.FC = () => {
                   <TableRow 
                     key={entry._id || index}
                     sx={{
-                      bgcolor: entry.isCurrentUser ? alpha('#f093fb', 0.1) : 'inherit',
+                      bgcolor: entry.isCurrentUser ? 'rgba(217,117,52,0.12)' : 'inherit',
                       transition: 'all 0.3s ease',
                       '&:hover': { 
-                        bgcolor: alpha('#f093fb', 0.05),
+                        bgcolor: 'rgba(217,117,52,0.07)',
                         transform: 'translateX(4px)',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                       },
@@ -533,7 +533,7 @@ const Leaderboard: React.FC = () => {
                         <Typography variant="body1" fontWeight={entry.isCurrentUser ? 'bold' : 'normal'}>
                           {entry.user?.firstName || 'Unknown'} {entry.user?.lastName || 'User'}
                           {entry.isCurrentUser && (
-                            <Chip label="You" size="small" sx={{ ml: 1, bgcolor: '#2196f3', color: 'white' }} />
+                            <Chip label="You" size="small" sx={{ ml: 1, bgcolor: '#d97534', color: 'white' }} />
                           )}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">

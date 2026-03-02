@@ -6,7 +6,6 @@ import {
   Avatar,
   Typography,
   IconButton,
-  Card,
   Slide,
   CircularProgress,
 } from '@mui/material';
@@ -20,6 +19,8 @@ import {
   VolumeOff,
 } from '@mui/icons-material';
 import { TransitionProps } from '@mui/material/transitions';
+
+const ACCENT = '#d97534';
 
 type CallState = 'idle' | 'outgoing' | 'incoming' | 'connected' | 'ended';
 
@@ -41,9 +42,7 @@ interface CallDialogProps {
 }
 
 const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement;
-  },
+  props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>,
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -64,19 +63,11 @@ export const CallDialog: React.FC<CallDialogProps> = ({
   const [isVideoOff, setIsVideoOff] = useState(callType === 'voice');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(callType === 'video');
-  
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Default participant data if not provided
-  const defaultParticipant = {
-    _id: 'unknown',
-    firstName: 'Unknown',
-    lastName: 'User',
-    avatar: undefined
-  };
-  
-  const participantData = participant || defaultParticipant;
+  const participantData = participant || { _id: 'unknown', firstName: 'Unknown', lastName: 'User', avatar: undefined };
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -84,58 +75,40 @@ export const CallDialog: React.FC<CallDialogProps> = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleToggleMute = () => {
-    setIsMuted(!isMuted);
-    // TODO: Implement actual mute functionality
-  };
-
-  const handleToggleVideo = () => {
-    setIsVideoOff(!isVideoOff);
-    // TODO: Implement actual video toggle functionality
-  };
-
-  const handleToggleSpeaker = () => {
-    setIsSpeakerOn(!isSpeakerOn);
-    // TODO: Implement actual speaker toggle functionality
-  };
-
-  const handleToggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
   const getCallStateText = (): string => {
     switch (callState) {
-      case 'idle':
-        return 'Ready to call';
-      case 'outgoing':
-        return 'Calling...';
-      case 'incoming':
-        return 'Incoming call';
-      case 'connected':
-        return formatDuration(duration);
-      case 'ended':
-        return 'Call ended';
-      default:
-        return '';
+      case 'idle': return 'Ready to call';
+      case 'outgoing': return 'Calling...';
+      case 'incoming': return 'Incoming call';
+      case 'connected': return formatDuration(duration);
+      case 'ended': return 'Call ended';
+      default: return '';
     }
   };
 
   const getCallStateColor = (): string => {
     switch (callState) {
-      case 'idle':
-        return '#757575';
-      case 'outgoing':
-        return '#2196f3';
-      case 'incoming':
-        return '#4caf50';
-      case 'connected':
-        return '#4caf50';
-      case 'ended':
-        return '#f44336';
-      default:
-        return '#666';
+      case 'idle': return '#aaa';
+      case 'outgoing': return '#4facfe';
+      case 'incoming': return '#51cf66';
+      case 'connected': return '#51cf66';
+      case 'ended': return '#ff6b6b';
+      default: return '#aaa';
     }
   };
+
+  const ctrlBtnSx = (active: boolean, danger?: boolean) => ({
+    width: 60, height: 60,
+    bgcolor: danger ? '#e53935' : active ? `${ACCENT}cc` : 'rgba(255,255,255,0.12)',
+    color: '#fff',
+    backdropFilter: 'blur(8px)',
+    border: `1px solid ${danger ? '#e5393588' : active ? `${ACCENT}66` : 'rgba(255,255,255,0.18)'}`,
+    '&:hover': {
+      bgcolor: danger ? '#c62828' : active ? ACCENT : 'rgba(255,255,255,0.22)',
+      transform: 'scale(1.08)',
+    },
+    transition: 'all 0.2s',
+  });
 
   return (
     <Dialog
@@ -145,250 +118,132 @@ export const CallDialog: React.FC<CallDialogProps> = ({
       TransitionComponent={Transition}
       PaperProps={{
         sx: {
-          background: callType === 'video' && callState === 'connected' 
-            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-            : 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)',
-          color: 'white',
+          background: callType === 'video' && callState === 'connected'
+            ? 'linear-gradient(160deg, #0a0f1e 0%, #111827 60%, #1a2332 100%)'
+            : 'linear-gradient(160deg, #0a0f1e 0%, #111827 50%, #1d2a42 100%)',
+          color: '#e8dcc4',
         }
       }}
     >
-      <DialogContent sx={{ p: 0, height: '100vh', position: 'relative' }}>
+      <DialogContent sx={{ p: 0, height: '100vh', position: 'relative', overflow: 'hidden' }}>
+
+        {/* Ambient glow blobs */}
+        <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
+          <Box sx={{ position: 'absolute', top: '-20%', left: '-10%', width: 400, height: 400, borderRadius: '50%', background: `radial-gradient(circle, ${ACCENT}18 0%, transparent 70%)` }} />
+          <Box sx={{ position: 'absolute', bottom: '-10%', right: '-5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(79,172,254,0.1) 0%, transparent 70%)' }} />
+        </Box>
+
         {/* Video Call Layout */}
         {callType === 'video' && callState === 'connected' && (
-          <Box sx={{ height: '100%', position: 'relative' }}>
-            {/* Remote Video (Main) */}
+          <Box sx={{ height: '100%', position: 'relative', zIndex: 1 }}>
             <video
               ref={remoteVideoRef}
               autoPlay
               playsInline
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                background: '#000',
-              }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#000' }}
             />
-            
-            {/* Local Video (Picture in Picture) */}
-            <Card
-              sx={{
-                position: 'absolute',
-                top: 20,
-                right: 20,
-                width: isFullscreen ? 120 : 180,
-                height: isFullscreen ? 90 : 135,
-                background: '#000',
-                overflow: 'hidden',
-                cursor: 'pointer',
-              }}
-              onClick={handleToggleFullscreen}
-            >
-              <video
-                ref={localVideoRef}
-                autoPlay
-                muted
-                playsInline
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            </Card>
-
-            {/* Call Info Overlay */}
             <Box
-              sx={{
-                position: 'absolute',
-                top: 20,
-                left: 20,
-                background: 'rgba(0,0,0,0.6)',
-                borderRadius: 2,
-                p: 2,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-              }}
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              sx={{ position: 'absolute', top: 20, right: 20, width: isFullscreen ? 120 : 180, height: isFullscreen ? 90 : 135, bgcolor: '#000', borderRadius: 2, overflow: 'hidden', cursor: 'pointer', border: `2px solid ${ACCENT}55` }}
             >
-              <Avatar src={participantData.avatar} sx={{ width: 40, height: 40 }}>
+              <video ref={localVideoRef} autoPlay muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </Box>
+            <Box sx={{ position: 'absolute', top: 20, left: 20, bgcolor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', borderRadius: 2, p: 1.5, display: 'flex', alignItems: 'center', gap: 2, border: `1px solid rgba(255,255,255,0.1)` }}>
+              <Avatar src={participantData.avatar} sx={{ width: 40, height: 40, border: `2px solid ${ACCENT}` }}>
                 {participantData.firstName?.[0]}{participantData.lastName?.[0]}
               </Avatar>
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                <Typography variant="subtitle2" sx={{ color: '#e8dcc4', fontWeight: 600 }}>
                   {participantData.firstName} {participantData.lastName}
                 </Typography>
-                <Typography variant="body2" sx={{ color: getCallStateColor() }}>
-                  {getCallStateText()}
-                </Typography>
+                <Typography variant="caption" sx={{ color: getCallStateColor() }}>{getCallStateText()}</Typography>
               </Box>
             </Box>
           </Box>
         )}
 
-        {/* Voice Call or Non-Connected Video Call Layout */}
+        {/* Voice / Non-connected Layout */}
         {(callType === 'voice' || callState !== 'connected') && (
-          <Box
-            sx={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              px: 4,
-            }}
-          >
-            {/* Participant Avatar */}
-            <Avatar
-              src={participantData.avatar}
-              sx={{
-                width: 200,
-                height: 200,
-                mb: 4,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-              }}
-            >
-              <Typography variant="h1" sx={{ fontSize: '80px', fontWeight: 300 }}>
+          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', px: 4, position: 'relative', zIndex: 1 }}>
+            {/* Pulse ring behind avatar */}
+            <Box sx={{ position: 'relative', mb: 4 }}>
+              {(callState === 'incoming' || callState === 'outgoing') && (
+                <>
+                  <Box sx={{ position: 'absolute', inset: -16, borderRadius: '50%', border: `2px solid ${ACCENT}44`, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                  <Box sx={{ position: 'absolute', inset: -32, borderRadius: '50%', border: `2px solid ${ACCENT}22`, animation: 'pulse 1.5s ease-in-out 0.4s infinite' }} />
+                  <style>{`@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.06);opacity:0.6} }`}</style>
+                </>
+              )}
+              <Avatar
+                src={participantData.avatar}
+                sx={{ width: 160, height: 160, bgcolor: `${ACCENT}33`, border: `4px solid ${ACCENT}66`, fontSize: '4rem' }}
+              >
                 {participantData.firstName?.[0]}{participantData.lastName?.[0]}
-              </Typography>
-            </Avatar>
+              </Avatar>
+            </Box>
 
-            {/* Participant Name */}
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: 300 }}>
+            <Typography variant="h4" sx={{ color: '#e8dcc4', fontWeight: 300, mb: 1 }}>
               {participantData.firstName} {participantData.lastName}
             </Typography>
-
-            {/* Call State */}
-            <Typography
-              variant="h6"
-              sx={{ 
-                color: getCallStateColor(),
-                mb: 4,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              {callState === 'outgoing' && <CircularProgress size={20} color="inherit" />}
+            <Typography variant="h6" sx={{ color: getCallStateColor(), mb: 5, display: 'flex', alignItems: 'center', gap: 1 }}>
+              {callState === 'outgoing' && <CircularProgress size={18} sx={{ color: getCallStateColor() }} />}
               {getCallStateText()}
             </Typography>
 
-            {/* Incoming Call Buttons */}
+            {/* Incoming call action buttons */}
             {callState === 'incoming' && (
-              <Box sx={{ display: 'flex', gap: 4, mb: 4 }}>
-                <IconButton
-                  onClick={onDecline}
-                  sx={{
-                    width: 70,
-                    height: 70,
-                    bgcolor: '#f44336',
-                    color: 'white',
-                    '&:hover': { bgcolor: '#d32f2f' },
-                  }}
-                >
-                  <CallEnd sx={{ fontSize: 30 }} />
-                </IconButton>
-                <IconButton
-                  onClick={onAnswer}
-                  sx={{
-                    width: 70,
-                    height: 70,
-                    bgcolor: '#4caf50',
-                    color: 'white',
-                    '&:hover': { bgcolor: '#388e3c' },
-                  }}
-                >
-                  {callType === 'video' ? (
-                    <Videocam sx={{ fontSize: 30 }} />
-                  ) : (
-                    <VolumeUp sx={{ fontSize: 30 }} />
-                  )}
-                </IconButton>
+              <Box sx={{ display: 'flex', gap: 5, mb: 5 }}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <IconButton onClick={onDecline} sx={{ width: 70, height: 70, bgcolor: '#e53935', color: '#fff', '&:hover': { bgcolor: '#c62828', transform: 'scale(1.08)' }, transition: 'all 0.2s' }}>
+                    <CallEnd sx={{ fontSize: 30 }} />
+                  </IconButton>
+                  <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'rgba(232,220,196,0.6)' }}>Decline</Typography>
+                </Box>
+                <Box sx={{ textAlign: 'center' }}>
+                  <IconButton onClick={onAnswer} sx={{ width: 70, height: 70, bgcolor: '#2e7d32', color: '#fff', '&:hover': { bgcolor: '#1b5e20', transform: 'scale(1.08)' }, transition: 'all 0.2s' }}>
+                    {callType === 'video' ? <Videocam sx={{ fontSize: 30 }} /> : <VolumeUp sx={{ fontSize: 30 }} />}
+                  </IconButton>
+                  <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'rgba(232,220,196,0.6)' }}>Answer</Typography>
+                </Box>
               </Box>
             )}
           </Box>
         )}
 
-        {/* Call Controls */}
+        {/* Call Controls Bar */}
         {(callState === 'connected' || callState === 'outgoing') && (
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: 'rgba(0,0,0,0.8)',
-              p: 3,
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 2,
-            }}
-          >
-            {/* Mute Button */}
-            <IconButton
-              onClick={handleToggleMute}
-              sx={{
-                width: 60,
-                height: 60,
-                bgcolor: isMuted ? '#f44336' : 'rgba(255,255,255,0.2)',
-                color: 'white',
-                '&:hover': { 
-                  bgcolor: isMuted ? '#d32f2f' : 'rgba(255,255,255,0.3)' 
-                },
-              }}
-            >
-              {isMuted ? <MicOff /> : <Mic />}
-            </IconButton>
+          <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.08)', p: 3, display: 'flex', justifyContent: 'center', gap: 2.5, zIndex: 10 }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <IconButton onClick={() => setIsMuted(!isMuted)} sx={ctrlBtnSx(isMuted, isMuted)}>
+                {isMuted ? <MicOff /> : <Mic />}
+              </IconButton>
+              <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'rgba(232,220,196,0.6)' }}>{isMuted ? 'Unmute' : 'Mute'}</Typography>
+            </Box>
 
-            {/* Video Toggle (for video calls) */}
             {callType === 'video' && (
-              <IconButton
-                onClick={handleToggleVideo}
-                sx={{
-                  width: 60,
-                  height: 60,
-                  bgcolor: isVideoOff ? '#f44336' : 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  '&:hover': { 
-                    bgcolor: isVideoOff ? '#d32f2f' : 'rgba(255,255,255,0.3)' 
-                  },
-                }}
-              >
-                {isVideoOff ? <VideocamOff /> : <Videocam />}
-              </IconButton>
+              <Box sx={{ textAlign: 'center' }}>
+                <IconButton onClick={() => setIsVideoOff(!isVideoOff)} sx={ctrlBtnSx(isVideoOff, isVideoOff)}>
+                  {isVideoOff ? <VideocamOff /> : <Videocam />}
+                </IconButton>
+                <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'rgba(232,220,196,0.6)' }}>{isVideoOff ? 'Start Video' : 'Stop Video'}</Typography>
+              </Box>
             )}
 
-            {/* Speaker Toggle (for voice calls) */}
             {callType === 'voice' && (
-              <IconButton
-                onClick={handleToggleSpeaker}
-                sx={{
-                  width: 60,
-                  height: 60,
-                  bgcolor: isSpeakerOn ? 'rgba(33,150,243,0.8)' : 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  '&:hover': { 
-                    bgcolor: isSpeakerOn ? 'rgba(30,136,229,0.9)' : 'rgba(255,255,255,0.3)' 
-                  },
-                }}
-              >
-                {isSpeakerOn ? <VolumeUp /> : <VolumeOff />}
-              </IconButton>
+              <Box sx={{ textAlign: 'center' }}>
+                <IconButton onClick={() => setIsSpeakerOn(!isSpeakerOn)} sx={ctrlBtnSx(isSpeakerOn)}>
+                  {isSpeakerOn ? <VolumeUp /> : <VolumeOff />}
+                </IconButton>
+                <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'rgba(232,220,196,0.6)' }}>Speaker</Typography>
+              </Box>
             )}
 
-            {/* End Call Button */}
-            <IconButton
-              onClick={onEndCall}
-              sx={{
-                width: 60,
-                height: 60,
-                bgcolor: '#f44336',
-                color: 'white',
-                '&:hover': { bgcolor: '#d32f2f' },
-              }}
-            >
-              <CallEnd />
-            </IconButton>
+            <Box sx={{ textAlign: 'center' }}>
+              <IconButton onClick={onEndCall} sx={{ width: 60, height: 60, bgcolor: '#e53935', color: '#fff', '&:hover': { bgcolor: '#c62828', transform: 'scale(1.08)' }, transition: 'all 0.2s' }}>
+                <CallEnd />
+              </IconButton>
+              <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'rgba(232,220,196,0.6)' }}>End</Typography>
+            </Box>
           </Box>
         )}
       </DialogContent>

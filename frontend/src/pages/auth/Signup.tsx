@@ -1,24 +1,22 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
   Typography,
   TextField,
   Button,
   Container,
-  Card,
-  CardContent,
   IconButton,
   InputAdornment,
   Alert,
-  Divider,
-  CircularProgress,
   Stepper,
   Step,
   StepLabel,
   RadioGroup,
   FormControlLabel,
   Radio,
+  Link,
+  CircularProgress,
 } from '@mui/material';
 import {
   Visibility,
@@ -27,8 +25,6 @@ import {
   Email as EmailIcon,
   Lock as LockIcon,
   Person as PersonIcon,
-  Google as GoogleIcon,
-  GitHub as GitHubIcon,
   MenuBook as StudentIcon,
   Psychology as TeacherIcon,
   ArrowBack as BackIcon,
@@ -44,12 +40,8 @@ const Signup: React.FC = () => {
   const { register } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: '' as 'student' | 'teacher' | '',
+    firstName: '', lastName: '', email: '', password: '',
+    confirmPassword: '', role: '' as 'student' | 'teacher' | '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -66,55 +58,33 @@ const Signup: React.FC = () => {
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
-
     if (step === 0) {
       if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
       if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     } else if (step === 1) {
       if (!formData.email.trim()) newErrors.email = 'Email is required';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        newErrors.email = 'Invalid email format';
-      }
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format';
       if (!formData.password) newErrors.password = 'Password is required';
-      else if (formData.password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
-      }
+      else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
       if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
-      else if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
-      }
+      else if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     } else if (step === 2) {
       if (!formData.role) newErrors.role = 'Please select a role';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNext = () => {
-    if (validateStep(activeStep)) {
-      setActiveStep(activeStep + 1);
-    }
-  };
+  const handleNext = () => { if (validateStep(activeStep)) setActiveStep(activeStep + 1); };
+  const handleBack = () => setActiveStep(activeStep - 1);
 
-  const handleBack = () => {
-    setActiveStep(activeStep - 1);
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!validateStep(activeStep)) return;
-    
     setLoading(true);
     setError('');
-
     try {
-      await register({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role as 'student' | 'teacher',
-      });
+      await register({ email: formData.email, password: formData.password, firstName: formData.firstName, lastName: formData.lastName, role: formData.role as 'student' | 'teacher' });
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Registration failed. Please try again.');
@@ -123,255 +93,108 @@ const Signup: React.FC = () => {
     }
   };
 
-  const textFieldStyles = {
+  // Shared field styles
+  const fieldSx = {
     '& .MuiOutlinedInput-root': {
-      color: 'white',
-      '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-      '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-      '&.Mui-focused fieldset': { borderColor: '#d97534' }
+      bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2,
+      '& fieldset': { borderColor: 'rgba(255,255,255,0.12)' },
+      '&:hover fieldset': { borderColor: 'rgba(217,117,52,0.5)' },
+      '&.Mui-focused fieldset': { borderColor: '#d97534' },
     },
-    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.6)' },
+    '& .MuiInputLabel-root': { color: 'rgba(232,220,196,0.6)' },
     '& .MuiInputLabel-root.Mui-focused': { color: '#d97534' },
-    '& .MuiFormHelperText-root': { color: '#f44336' }
+    '& input': { color: '#e8dcc4' },
+    '& .MuiInputAdornment-root svg': { color: 'rgba(232,220,196,0.45)' },
+    '& .MuiFormHelperText-root': { color: '#ff8a8a' },
   };
 
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <TextField
-              fullWidth
-              name="firstName"
-              label="First Name"
-              value={formData.firstName}
-              onChange={handleChange}
-              error={!!errors.firstName}
-              helperText={errors.firstName}
-              sx={textFieldStyles}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                  </InputAdornment>
-                )
-              }}
-            />
-            <TextField
-              fullWidth
-              name="lastName"
-              label="Last Name"
-              value={formData.lastName}
-              onChange={handleChange}
-              error={!!errors.lastName}
-              helperText={errors.lastName}
-              sx={textFieldStyles}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                  </InputAdornment>
-                )
-              }}
-            />
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+            <TextField fullWidth name="firstName" label="First Name" value={formData.firstName}
+              onChange={handleChange} error={!!errors.firstName} helperText={errors.firstName} sx={fieldSx}
+              InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon /></InputAdornment> }} />
+            <TextField fullWidth name="lastName" label="Last Name" value={formData.lastName}
+              onChange={handleChange} error={!!errors.lastName} helperText={errors.lastName} sx={fieldSx}
+              InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon /></InputAdornment> }} />
           </Box>
         );
       case 1:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <TextField
-              fullWidth
-              name="email"
-              label="Email Address"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={!!errors.email}
-              helperText={errors.email}
-              sx={textFieldStyles}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            <TextField fullWidth name="email" label="Email Address" type="email" value={formData.email}
+              onChange={handleChange} error={!!errors.email} helperText={errors.email} sx={fieldSx}
+              InputProps={{ startAdornment: <InputAdornment position="start"><EmailIcon /></InputAdornment> }} />
+            <TextField fullWidth name="password" label="Password" type={showPassword ? 'text' : 'password'}
+              value={formData.password} onChange={handleChange} error={!!errors.password} helperText={errors.password} sx={fieldSx}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                  </InputAdornment>
-                )
-              }}
-            />
-            <TextField
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={handleChange}
-              error={!!errors.password}
-              helperText={errors.password}
-              sx={textFieldStyles}
+                startAdornment: <InputAdornment position="start"><LockIcon /></InputAdornment>,
+                endAdornment: <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: 'rgba(232,220,196,0.5)' }}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>,
+              }} />
+            <TextField fullWidth name="confirmPassword" label="Confirm Password" type={showConfirmPassword ? 'text' : 'password'}
+              value={formData.confirmPassword} onChange={handleChange} error={!!errors.confirmPassword} helperText={errors.confirmPassword} sx={fieldSx}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton 
-                      onClick={() => setShowPassword(!showPassword)}
-                      sx={{ color: 'rgba(255,255,255,0.5)' }}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
-            <TextField
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type={showConfirmPassword ? 'text' : 'password'}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
-              sx={textFieldStyles}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockIcon sx={{ color: 'rgba(255,255,255,0.5)' }} />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton 
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      sx={{ color: 'rgba(255,255,255,0.5)' }}
-                    >
-                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }}
-            />
+                startAdornment: <InputAdornment position="start"><LockIcon /></InputAdornment>,
+                endAdornment: <InputAdornment position="end">
+                  <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" sx={{ color: 'rgba(232,220,196,0.5)' }}>
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>,
+              }} />
           </Box>
         );
       case 2:
         return (
           <Box>
-            <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.7)', mb: 3, textAlign: 'center' }}>
+            <Typography variant="body1" sx={{ mb: 3, textAlign: 'center', color: 'rgba(232,220,196,0.75)' }}>
               How do you plan to use EduVerse?
             </Typography>
-            {errors.role && (
-              <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(211, 47, 47, 0.1)', color: '#f44336' }}>
-                {errors.role}
-              </Alert>
-            )}
-            <RadioGroup
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              sx={{ gap: 2 }}
-            >
-              <FormControlLabel
-                value="student"
-                control={<Radio sx={{ display: 'none' }} />}
-                label={
-                  <Card 
-                    sx={{
-                      width: '100%',
-                      background: formData.role === 'student' 
-                        ? 'linear-gradient(135deg, rgba(217, 117, 52, 0.2) 0%, rgba(200, 99, 41, 0.2) 100%)'
-                        : 'rgba(255,255,255,0.05)',
-                      border: formData.role === 'student' 
-                        ? '2px solid #d97534'
-                        : '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 3,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        borderColor: formData.role === 'student' ? '#d97534' : 'rgba(255,255,255,0.3)',
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  >
-                    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 3, p: 3 }}>
+            {errors.role && <Alert severity="error" sx={{ mb: 2, bgcolor: 'rgba(255,107,107,0.1)', color: '#ff8a8a' }}>{errors.role}</Alert>}
+            <RadioGroup name="role" value={formData.role} onChange={handleChange} sx={{ gap: 2 }}>
+              {[
+                { value: 'student', label: 'Student', desc: 'Learn new skills, take courses, and earn certificates', icon: <StudentIcon fontSize="large" /> },
+                { value: 'teacher', label: 'Teacher', desc: 'Create courses, monitor progress, and mentor students', icon: <TeacherIcon fontSize="large" /> },
+              ].map((option) => (
+                <FormControlLabel
+                  key={option.value} value={option.value}
+                  control={<Radio sx={{ display: 'none' }} />}
+                  label={
+                    <Box sx={{
+                      width: '100%', p: 2.5, borderRadius: 2,
+                      border: `2px solid ${formData.role === option.value ? '#d97534' : 'rgba(255,255,255,0.1)'}`,
+                      bgcolor: formData.role === option.value ? 'rgba(217,117,52,0.12)' : 'rgba(255,255,255,0.03)',
+                      cursor: 'pointer', transition: 'all 0.2s',
+                      display: 'flex', alignItems: 'center', gap: 2.5,
+                      '&:hover': { borderColor: 'rgba(217,117,52,0.5)', bgcolor: 'rgba(217,117,52,0.06)' },
+                    }}>
                       <Box sx={{
-                        width: 60,
-                        height: 60,
-                        borderRadius: 3,
-                        bgcolor: formData.role === 'student' ? 'rgba(217, 117, 52, 0.3)' : 'rgba(255,255,255,0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
+                        p: 1.5, borderRadius: 2,
+                        bgcolor: formData.role === option.value ? '#d97534' : 'rgba(255,255,255,0.08)',
+                        color: formData.role === option.value ? '#fff' : 'rgba(232,220,196,0.6)',
+                        display: 'flex', flexShrink: 0,
                       }}>
-                        <StudentIcon sx={{ fontSize: 30, color: formData.role === 'student' ? '#d97534' : 'rgba(255,255,255,0.5)' }} />
+                        {option.icon}
                       </Box>
                       <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" color="white" fontWeight="bold">
-                          I'm a Student
+                        <Typography variant="h6" fontWeight={700} sx={{ color: formData.role === option.value ? '#d97534' : '#e8dcc4' }}>
+                          {option.label}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                          Learn new skills, take courses, and earn certificates
-                        </Typography>
-                      </Box>
-                      {formData.role === 'student' && (
-                        <CheckIcon sx={{ color: '#d97534', fontSize: 28 }} />
-                      )}
-                    </CardContent>
-                  </Card>
-                }
-                sx={{ mx: 0, width: '100%' }}
-              />
-              <FormControlLabel
-                value="teacher"
-                control={<Radio sx={{ display: 'none' }} />}
-                label={
-                  <Card 
-                    sx={{
-                      width: '100%',
-                      background: formData.role === 'teacher' 
-                        ? 'linear-gradient(135deg, rgba(217, 117, 52, 0.2) 0%, rgba(200, 99, 41, 0.2) 100%)'
-                        : 'rgba(255,255,255,0.05)',
-                      border: formData.role === 'teacher' 
-                        ? '2px solid #d97534'
-                        : '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 3,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        borderColor: formData.role === 'teacher' ? '#d97534' : 'rgba(255,255,255,0.3)',
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  >
-                    <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 3, p: 3 }}>
-                      <Box sx={{
-                        width: 60,
-                        height: 60,
-                        borderRadius: 3,
-                        bgcolor: formData.role === 'teacher' ? 'rgba(217, 117, 52, 0.3)' : 'rgba(255,255,255,0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        <TeacherIcon sx={{ fontSize: 30, color: formData.role === 'teacher' ? '#d97534' : 'rgba(255,255,255,0.5)' }} />
-                      </Box>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" color="white" fontWeight="bold">
-                          I'm a Teacher
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                          Create courses, teach students, and share your expertise
+                        <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.6)' }}>
+                          {option.desc}
                         </Typography>
                       </Box>
-                      {formData.role === 'teacher' && (
-                        <CheckIcon sx={{ color: '#d97534', fontSize: 28 }} />
-                      )}
-                    </CardContent>
-                  </Card>
-                }
-                sx={{ mx: 0, width: '100%' }}
-              />
+                      {formData.role === option.value && <CheckIcon sx={{ color: '#d97534', flexShrink: 0 }} />}
+                    </Box>
+                  }
+                  sx={{ m: 0, width: '100%' }}
+                />
+              ))}
             </RadioGroup>
           </Box>
         );
@@ -383,216 +206,103 @@ const Signup: React.FC = () => {
   return (
     <Box sx={{
       minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #1a2332 0%, #2c3e50 30%, #34495e 60%, #1a2332 100%)',
-      py: 4,
-      position: 'relative',
-      overflow: 'hidden'
+      background: 'linear-gradient(135deg, #111827 0%, #1a2332 50%, #2c3e50 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      py: 5, position: 'relative', overflow: 'hidden',
     }}>
-      {/* Background Decorations */}
-      <Box sx={{
-        position: 'absolute',
-        top: '20%',
-        right: '5%',
-        width: 350,
-        height: 350,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(211, 84, 0, 0.12) 0%, transparent 70%)',
-        filter: 'blur(50px)',
-        pointerEvents: 'none'
-      }} />
-      <Box sx={{
-        position: 'absolute',
-        bottom: '15%',
-        left: '5%',
-        width: 300,
-        height: 300,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(52, 73, 94, 0.4) 0%, transparent 70%)',
-        filter: 'blur(40px)',
-        pointerEvents: 'none'
-      }} />
+      <Box sx={{ position: 'absolute', top: '15%', right: '12%', width: 400, height: 400,
+        background: 'radial-gradient(circle, rgba(217,117,52,0.1) 0%, transparent 70%)',
+        pointerEvents: 'none', filter: 'blur(60px)' }} />
+      <Box sx={{ position: 'absolute', bottom: '10%', left: '8%', width: 350, height: 350,
+        background: 'radial-gradient(circle, rgba(79,172,254,0.07) 0%, transparent 70%)',
+        pointerEvents: 'none', filter: 'blur(60px)' }} />
 
-      <Container maxWidth="sm">
-        <Card sx={{
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+      <Container maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box sx={{
+          bgcolor: 'rgba(30,41,64,0.88)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 4,
-          overflow: 'hidden'
+          borderRadius: 3,
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
+          overflow: 'hidden',
         }}>
-          <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-            {/* Logo */}
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <Box 
-                onClick={() => navigate('/home')}
-                sx={{ 
-                  width: 60, 
-                  height: 60, 
-                  borderRadius: 3, 
-                  background: 'linear-gradient(135deg, #d97534 0%, #c86329 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mx: 'auto',
-                  mb: 2,
-                  cursor: 'pointer',
-                  transition: 'transform 0.3s ease',
-                  '&:hover': { transform: 'scale(1.1)' }
-                }}
-              >
-                <SchoolIcon sx={{ color: 'white', fontSize: 32 }} />
-              </Box>
-              <Typography variant="h4" fontWeight="bold" color="white">
-                Create Account
-              </Typography>
-              <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.6)', mt: 1 }}>
-                Start your learning journey today
-              </Typography>
+          {/* Header */}
+          <Box sx={{ px: 5, pt: 5, pb: 4, textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <Box onClick={() => navigate('/')} sx={{
+              width: 56, height: 56, borderRadius: 2, mx: 'auto', mb: 2,
+              background: 'linear-gradient(135deg, #d97534, #c06420)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', boxShadow: '0 6px 20px rgba(217,117,52,0.4)',
+              transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' },
+            }}>
+              <SchoolIcon sx={{ color: '#fff', fontSize: 28 }} />
             </Box>
+            <Typography variant="h4" fontWeight={700} sx={{ color: '#e8dcc4', mb: 0.5 }}>
+              Join EduVerse
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(232,220,196,0.6)', mb: 3.5 }}>
+              Start your learning journey today
+            </Typography>
 
-            {/* Stepper */}
-            <Stepper 
-              activeStep={activeStep} 
-              alternativeLabel 
-              sx={{ 
-                mb: 4,
-                '& .MuiStepLabel-label': { color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' },
-                '& .MuiStepLabel-label.Mui-active': { color: '#d97534' },
-                '& .MuiStepLabel-label.Mui-completed': { color: '#2ecc71' },
-                '& .MuiStepIcon-root': { color: 'rgba(255,255,255,0.2)' },
-                '& .MuiStepIcon-root.Mui-active': { color: '#d97534' },
-                '& .MuiStepIcon-root.Mui-completed': { color: '#2ecc71' },
-              }}
-            >
+            <Stepper activeStep={activeStep} alternativeLabel sx={{
+              '& .MuiStepLabel-label': { color: 'rgba(232,220,196,0.5) !important', fontSize: '0.78rem' },
+              '& .MuiStepLabel-label.Mui-active': { color: '#e8dcc4 !important', fontWeight: 700 },
+              '& .MuiStepLabel-label.Mui-completed': { color: '#d97534 !important' },
+              '& .MuiStepIcon-root': { color: 'rgba(255,255,255,0.15)' },
+              '& .MuiStepIcon-root.Mui-active': { color: '#d97534' },
+              '& .MuiStepIcon-root.Mui-completed': { color: '#d97534' },
+              '& .MuiStepConnector-line': { borderColor: 'rgba(255,255,255,0.1)' },
+            }}>
               {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
+                <Step key={label}><StepLabel>{label}</StepLabel></Step>
               ))}
             </Stepper>
+          </Box>
 
+          {/* Form */}
+          <Box sx={{ p: { xs: 3, sm: 5 } }}>
             {error && (
-              <Alert severity="error" sx={{ mb: 3, bgcolor: 'rgba(211, 47, 47, 0.1)', color: '#f44336' }}>
+              <Alert severity="error" sx={{
+                mb: 3, bgcolor: 'rgba(255,107,107,0.12)', color: '#ff8a8a',
+                border: '1px solid rgba(255,107,107,0.25)',
+                '& .MuiAlert-icon': { color: '#ff6b6b' },
+              }}>
                 {error}
               </Alert>
             )}
 
-            {/* Step Content */}
-            {renderStepContent(activeStep)}
+            <form onSubmit={handleSubmit}>
+              {renderStepContent(activeStep)}
 
-            {/* Navigation Buttons */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-              <Button
-                startIcon={<BackIcon />}
-                onClick={handleBack}
-                disabled={activeStep === 0}
-                sx={{ 
-                  color: activeStep === 0 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.7)',
-                  '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' }
-                }}
-              >
-                Back
-              </Button>
-              
-              {activeStep === steps.length - 1 ? (
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                  disabled={loading}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                <Button disabled={activeStep === 0} onClick={handleBack} startIcon={<BackIcon />}
                   sx={{
-                    background: 'linear-gradient(135deg, #d97534 0%, #c86329 100%)',
-                    borderRadius: 2,
-                    px: 4,
-                    py: 1.5,
-                    fontWeight: 600,
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #c86329 0%, #b7551f 100%)',
-                    }
-                  }}
-                >
-                  {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Create Account'}
+                    color: 'rgba(232,220,196,0.7)', visibility: activeStep === 0 ? 'hidden' : 'visible',
+                    textTransform: 'none',
+                  }}>
+                  Back
                 </Button>
-              ) : (
-                <Button
-                  variant="contained"
-                  endIcon={<NextIcon />}
-                  onClick={handleNext}
-                  sx={{
-                    background: 'linear-gradient(135deg, #d97534 0%, #c86329 100%)',
-                    borderRadius: 2,
-                    px: 4,
-                    py: 1.5,
-                    fontWeight: 600,
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #c86329 0%, #b7551f 100%)',
-                    }
-                  }}
-                >
-                  Next
-                </Button>
-              )}
-            </Box>
-
-            {activeStep === 0 && (
-              <>
-                <Divider sx={{ my: 4, '&::before, &::after': { borderColor: 'rgba(255,255,255,0.1)' } }}>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', px: 2 }}>
-                    or sign up with
-                  </Typography>
-                </Divider>
-
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<GoogleIcon />}
-                    sx={{
-                      borderColor: 'rgba(255,255,255,0.2)',
-                      color: 'white',
-                      py: 1.5,
-                      '&:hover': { borderColor: 'rgba(255,255,255,0.4)', bgcolor: 'rgba(255,255,255,0.05)' }
-                    }}
-                  >
-                    Google
+                {activeStep === steps.length - 1 ? (
+                  <Button variant="contained" onClick={handleSubmit} disabled={loading} size="large" sx={{ px: 5, borderRadius: 2 }}>
+                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
                   </Button>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<GitHubIcon />}
-                    sx={{
-                      borderColor: 'rgba(255,255,255,0.2)',
-                      color: 'white',
-                      py: 1.5,
-                      '&:hover': { borderColor: 'rgba(255,255,255,0.4)', bgcolor: 'rgba(255,255,255,0.05)' }
-                    }}
-                  >
-                    GitHub
+                ) : (
+                  <Button variant="contained" onClick={handleNext} endIcon={<NextIcon />} size="large" sx={{ px: 4, borderRadius: 2 }}>
+                    Next
                   </Button>
-                </Box>
-              </>
-            )}
+                )}
+              </Box>
+            </form>
 
-            <Typography 
-              variant="body1" 
-              sx={{ textAlign: 'center', mt: 4, color: 'rgba(255,255,255,0.6)' }}
-            >
+            <Typography variant="body2" sx={{ textAlign: 'center', mt: 4, color: 'rgba(232,220,196,0.6)' }}>
               Already have an account?{' '}
-              <Link 
-                to="/login" 
-                style={{ 
-                  color: '#d97534', 
-                  textDecoration: 'none',
-                  fontWeight: 600
-                }}
-              >
+              <Link component={RouterLink} to="/login" underline="hover"
+                sx={{ color: '#d97534', fontWeight: 700, '&:hover': { color: '#e8905a' } }}>
                 Sign In
               </Link>
             </Typography>
-          </CardContent>
-        </Card>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

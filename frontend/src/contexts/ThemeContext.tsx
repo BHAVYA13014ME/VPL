@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type Theme = 'light' | 'dark' | 'blue' | 'purple' | 'green';
+export type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
@@ -23,20 +23,22 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<Theme>('dark');
 
   // Load theme from localStorage on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('dashboard-theme') as Theme;
-    if (savedTheme && ['light', 'dark', 'blue', 'purple', 'green'].includes(savedTheme)) {
+    if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
       setThemeState(savedTheme);
+    } else {
+      setThemeState('dark');
     }
   }, []);
 
   // Apply theme to document body and save to localStorage
   useEffect(() => {
     // Remove existing theme classes
-    document.body.classList.remove('theme-light', 'theme-dark', 'theme-blue', 'theme-purple', 'theme-green');
+    document.body.classList.remove('theme-light', 'theme-dark');
     
     // Add current theme class
     document.body.classList.add(`theme-${theme}`);
@@ -58,44 +60,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         root.style.setProperty('--theme-gradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
         break;
       case 'dark':
-        root.style.setProperty('--theme-bg-primary', '#121212');
-        root.style.setProperty('--theme-bg-secondary', '#1e1e1e');
-        root.style.setProperty('--theme-bg-card', '#2d2d2d');
-        root.style.setProperty('--theme-text-primary', '#ffffff');
-        root.style.setProperty('--theme-text-secondary', '#b3b3b3');
-        root.style.setProperty('--theme-border', '#404040');
-        root.style.setProperty('--theme-shadow', 'rgba(0, 0, 0, 0.3)');
-        root.style.setProperty('--theme-gradient', 'linear-gradient(135deg, #434343 0%, #000000 100%)');
-        break;
-      case 'blue':
-        root.style.setProperty('--theme-bg-primary', 'linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%)');
-        root.style.setProperty('--theme-bg-secondary', '#3a42b5');
-        root.style.setProperty('--theme-bg-card', 'rgba(255, 255, 255, 0.1)');
-        root.style.setProperty('--theme-text-primary', '#ffffff');
-        root.style.setProperty('--theme-text-secondary', '#e8eaff');
-        root.style.setProperty('--theme-border', 'rgba(255, 255, 255, 0.2)');
-        root.style.setProperty('--theme-shadow', 'rgba(78, 84, 200, 0.3)');
-        root.style.setProperty('--theme-gradient', 'linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%)');
-        break;
-      case 'purple':
-        root.style.setProperty('--theme-bg-primary', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
-        root.style.setProperty('--theme-bg-secondary', '#5a3f8a');
-        root.style.setProperty('--theme-bg-card', 'rgba(255, 255, 255, 0.1)');
-        root.style.setProperty('--theme-text-primary', '#ffffff');
-        root.style.setProperty('--theme-text-secondary', '#f0e6ff');
-        root.style.setProperty('--theme-border', 'rgba(255, 255, 255, 0.2)');
-        root.style.setProperty('--theme-shadow', 'rgba(118, 75, 162, 0.3)');
-        root.style.setProperty('--theme-gradient', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)');
-        break;
-      case 'green':
-        root.style.setProperty('--theme-bg-primary', 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)');
-        root.style.setProperty('--theme-bg-secondary', '#0f8679');
-        root.style.setProperty('--theme-bg-card', 'rgba(255, 255, 255, 0.1)');
-        root.style.setProperty('--theme-text-primary', '#ffffff');
-        root.style.setProperty('--theme-text-secondary', '#e6fff9');
-        root.style.setProperty('--theme-border', 'rgba(255, 255, 255, 0.2)');
-        root.style.setProperty('--theme-shadow', 'rgba(17, 153, 142, 0.3)');
-        root.style.setProperty('--theme-gradient', 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)');
+        root.style.setProperty('--theme-bg-primary', '#111827');
+        root.style.setProperty('--theme-bg-secondary', '#1a2332');
+        root.style.setProperty('--theme-bg-card', '#1e2940');
+        root.style.setProperty('--theme-text-primary', '#e8dcc4');
+        root.style.setProperty('--theme-text-secondary', 'rgba(232, 220, 196, 0.65)');
+        root.style.setProperty('--theme-border', 'rgba(255, 255, 255, 0.08)');
+        root.style.setProperty('--theme-shadow', 'rgba(0, 0, 0, 0.5)');
+        root.style.setProperty('--theme-accent', '#d97534');
+        root.style.setProperty('--theme-gradient', 'linear-gradient(135deg, #1a2332 0%, #2c3e50 100%)');
         break;
     }
   }, [theme]);
@@ -105,10 +78,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   };
 
   const toggleTheme = () => {
-    const themes: Theme[] = ['light', 'dark', 'blue', 'purple', 'green'];
-    const currentIndex = themes.indexOf(theme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   return (
