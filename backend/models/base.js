@@ -80,51 +80,49 @@ function buildWhere(query, scalarCols, startIdx = 1) {
       continue;
     }
 
-    // JSONB path (supports simple dot-notation and operators)
+    // JSONB path (supports dot-notation and operators)
     const parts = key.split('.');
-    const jsonPath = parts.map((p, i) => i === 0 ? `data` : `'${p}'`).join('->');
-    const jsonPathText = parts.map((p, i) => {
-      if (i === 0) return `data`;
-      if (i === parts.length - 1) return `->'${p}'`;
-      return `->'${p}'`;
-    });
+    // Build proper JSONB accessor: data->'a'->'b'->>'c'
+    const buildJsonbPath = (ps) => {
+      if (ps.length === 1) return `data->>'${ps[0]}'`;
+      const inner = ps.slice(0, -1).map(p => `->'${p}'`).join('');
+      return `data${inner}->>'${ps[ps.length - 1]}'`;
+    };
+    const jsonbPath = buildJsonbPath(parts);
 
     if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
       const operators = Object.keys(value);
       if (operators.some(op => op.startsWith('$'))) {
+        const numericPath = parts.length > 1
+          ? `(data${parts.slice(0,-1).map(p=>`->'${p}'`).join('')}->>'${parts[parts.length-1]}')::numeric`
+          : `(data->>'${parts[0]}')::numeric`;
         for (const [op, opVal] of Object.entries(value)) {
-          if (op === '$in') {
-            // data->'field' ?| array  or  data->>'field' = ANY(array)
-            params.push(opVal);
-            conds.push(`data->>'${parts[parts.length-1]}' = ANY($${idx++}::text[])`);
-          } else if (op === '$gt')  { params.push(String(opVal)); conds.push(`(data->>'${parts[parts.length-1]}')::numeric > $${idx++}`); }
-          else if (op === '$gte') { params.push(String(opVal)); conds.push(`(data->>'${parts[parts.length-1]}')::numeric >= $${idx++}`); }
-          else if (op === '$lt')  { params.push(String(opVal)); conds.push(`(data->>'${parts[parts.length-1]}')::numeric < $${idx++}`); }
-          else if (op === '$lte') { params.push(String(opVal)); conds.push(`(data->>'${parts[parts.length-1]}')::numeric <= $${idx++}`); }
-          else if (op === '$ne')  { params.push(String(opVal)); conds.push(`data->>'${parts[parts.length-1]}' != $${idx++}`); }
-          else if (op === '$exists') {
-            conds.push(`data ? '${parts[parts.length-1]}'`);
-          }
+          if (op === '$in')    { params.push(opVal); conds.push(`${jsonbPath} = ANY($${idx++}::text[])`); }
+          else if (op === '$gt')  { params.push(String(opVal)); conds.push(`${numericPath} > $${idx++}`); }
+          else if (op === '$gte') { params.push(String(opVal)); conds.push(`${numericPath} >= $${idx++}`); }
+          else if (op === '$lt')  { params.push(String(opVal)); conds.push(`${numericPath} < $${idx++}`); }
+          else if (op === '$lte') { params.push(String(opVal)); conds.push(`${numericPath} <= $${idx++}`); }
+          else if (op === '$ne')  { params.push(String(opVal)); conds.push(`${jsonbPath} != $${idx++}`); }
+          else if (op === '$exists') { conds.push(opVal ? `${jsonbPath} IS NOT NULL` : `${jsonbPath} IS NULL`); }
         }
         continue;
       }
     }
 
     if (value === null) {
-      conds.push(`data->>'${parts[parts.length-1]}' IS NULL`);
+      conds.push(`${jsonbPath} IS NULL`);
     } else if (typeof value === 'boolean') {
       params.push(String(value));
-      conds.push(`data->>'${parts[parts.length-1]}' = $${idx++}`);
+      conds.push(`${jsonbPath} = $${idx++}`);
     } else if (typeof value === 'number') {
       params.push(String(value));
-      conds.push(`(data->>'${parts[parts.length-1]}')::numeric = $${idx++}`);
+      conds.push(`(${jsonbPath})::numeric = $${idx++}`);;
     } else if (key === '$text') {
-      // Full-text search fallback – search across all text in data
       params.push(`%${value.$search}%`);
       conds.push(`data::text ILIKE $${idx++}`);
     } else {
       params.push(String(value));
-      conds.push(`data->>'${parts[parts.length-1]}' = $${idx++}`);
+      conds.push(`${jsonbPath} = $${idx++}`);
     }
   }
 
@@ -133,15 +131,22 @@ function buildWhere(query, scalarCols, startIdx = 1) {
 }
 
 /** Build ORDER BY clause from mongoose sort object */
-function buildOrderBy(sort) {
+function buildOrderBy(sort, scalarCols = {}) {
   if (!sort || Object.keys(sort).length === 0) return '';
   const parts = [];
   for (const [field, dir] of Object.entries(sort)) {
     const direction = dir === -1 || dir === 'desc' ? 'DESC' : 'ASC';
     if (field === 'createdAt') { parts.push(`created_at ${direction}`); continue; }
     if (field === 'updatedAt') { parts.push(`updated_at ${direction}`); continue; }
-    // numeric JSONB sort
-    parts.push(`(data->>'${field}') ${direction}`);
+    if (scalarCols[field])     { parts.push(`${scalarCols[field]} ${direction}`); continue; }
+    // JSONB path (may be nested like 'rating.average')
+    const ps = field.split('.');
+    if (ps.length > 1) {
+      const expr = `(data${ps.slice(0,-1).map(p=>`->'${p}'`).join('')}->>'${ps[ps.length-1]}')::numeric`;
+      parts.push(`${expr} ${direction}`);
+    } else {
+      parts.push(`(data->>'${field}') ${direction}`);
+    }
   }
   return parts.length ? `ORDER BY ${parts.join(', ')}` : '';
 }
@@ -202,7 +207,7 @@ class Query {
     const params = [...this._params];
 
     // Sorting
-    const order = buildOrderBy(this._sort);
+    const order = buildOrderBy(this._sort, this._scalarCols);
     if (order) sql += ` ${order}`;
 
     // Pagination
