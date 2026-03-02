@@ -1,9 +1,52 @@
-const mongoose = require('mongoose');
+/* ── Course model (PostgreSQL / Neon) ── */
+const { BaseModel, registerModel } = require('./base');
 
-const lessonSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, 'Lesson title is required'],
+const SCALAR_COLS = {
+  instructor   : 'instructor_id',
+  isPublished  : 'is_published',
+};
+const DEFAULTS = {
+  isPublished      : false,
+  isPaid           : false,
+  price            : 0,
+  currency         : 'USD',
+  thumbnail        : '',
+  coverImage       : '',
+  lessons          : [],
+  prerequisites    : [],
+  learningOutcomes : [],
+  tags             : [],
+  language         : 'English',
+  duration         : 0,
+  level            : 'beginner',
+  enrollmentCount  : 0,
+  rating           : { average: 0, count: 0 },
+  reviews          : [],
+  assignments      : [],
+  announcements    : [],
+};
+
+class CourseModel extends BaseModel {
+  constructor() { super('courses', SCALAR_COLS, DEFAULTS, null); }
+  async getPopularCourses(limit=10) {
+    return this.find({ isPublished:true }).sort({ enrollmentCount:-1 }).limit(limit).lean();
+  }
+  async getCoursesByCategory(category, limit=10) {
+    return this.find({ isPublished:true, category }).limit(limit).lean();
+  }
+}
+
+const Course = new CourseModel();
+registerModel('Course', Course);
+
+const CourseProxy = new Proxy(Course, {
+  construct(t, args) { return t.new(args[0]||{}); },
+  get(t, prop)       { return t[prop]; },
+});
+
+module.exports = CourseProxy;
+/* ======= OLD MONGOOSE SCHEMA =======
+_ds2 = { title: {
     trim: true,
     maxlength: [200, 'Lesson title cannot exceed 200 characters']
   },
@@ -344,4 +387,4 @@ courseSchema.index({ enrollmentCount: -1 });
 courseSchema.index({ createdAt: -1 });
 courseSchema.index({ title: 'text', description: 'text', tags: 'text' });
 
-module.exports = mongoose.model('Course', courseSchema);
+======= END OLD SCHEMA */ 

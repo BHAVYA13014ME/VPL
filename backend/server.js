@@ -16,7 +16,7 @@ console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('PORT:', process.env.PORT);
 const express = require('express');
-const mongoose = require('mongoose');
+// mongoose removed – using PostgreSQL / Neon via ./db.js
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -162,10 +162,11 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/virtual-learning')
-.then(() => console.log('✅ MongoDB connected successfully'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+// PostgreSQL / Neon connection
+const { initSchema } = require('./db');
+initSchema()
+  .then(() => console.log('✅ Neon PostgreSQL connected & schema ready'))
+  .catch(err => { console.error('❌ PostgreSQL init error:', err); process.exit(1); });
 
 const PORT = process.env.PORT || 5000;
 

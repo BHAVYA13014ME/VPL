@@ -1,8 +1,38 @@
-const mongoose = require('mongoose');
+/* ── Assignment model (PostgreSQL / Neon) ── */
+const { BaseModel, registerModel } = require('./base');
 
-const submissionSchema = new mongoose.Schema({
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
+const SCALAR_COLS = {
+  course     : 'course_id',
+  instructor : 'instructor_id',
+};
+const DEFAULTS = {
+  type          : 'essay',
+  maxScore      : 100,
+  isPublished   : false,
+  submissions   : [],
+  attachments   : [],
+  allowedFormats: [],
+  maxFileSize   : 10,
+  maxFiles      : 5,
+  allowLate     : false,
+  latePenalty   : 0,
+};
+
+class AssignmentModel extends BaseModel {
+  constructor() { super('assignments', SCALAR_COLS, DEFAULTS, null); }
+}
+
+const Assignment = new AssignmentModel();
+registerModel('Assignment', Assignment);
+
+const AssignmentProxy = new Proxy(Assignment, {
+  construct(t, args) { return t.new(args[0]||{}); },
+  get(t, prop)       { return t[prop]; },
+});
+
+module.exports = AssignmentProxy;
+/* ======= OLD MONGOOSE SCHEMA =======
+_ds3 = { student: {
     ref: 'User',
     required: true
   },
@@ -356,4 +386,4 @@ assignmentSchema.index({ isPublished: 1 });
 assignmentSchema.index({ 'submissions.student': 1 });
 assignmentSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('Assignment', assignmentSchema);
+======= END OLD SCHEMA */ 

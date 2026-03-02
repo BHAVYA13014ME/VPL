@@ -1,11 +1,64 @@
-const mongoose = require('mongoose');
+/* ── Leaderboard model (PostgreSQL / Neon) ── */
+const { BaseModel, registerModel } = require('./base');
 
-const leaderboardEntrySchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
+const SCALAR_COLS = {
+  user        : 'user_id',
+  category    : 'category',
+  period      : 'period',
+  points      : 'points',
+  rank        : 'rank',
+  lastUpdated : 'last_updated',
+};
+const DEFAULTS = {
+  category    : 'overall',
+  period      : 'all_time',
+  points      : 0,
+  rank        : 1,
+  level       : 1,
+  badges      : [],
+  achievements: [],
+  statistics  : { coursesCompleted:0, assignmentsSubmitted:0, averageScore:0, studyStreak:{ current:0, longest:0, lastStudyDate:null }, timeSpent:0, discussionPosts:0, helpfulVotes:0, coursesCreated:0 },
+  lastUpdated : null,
+};
+
+function onAfterLoad(doc) {
+  const pts = doc.points || 0;
+  Object.defineProperties(doc, {
+    calculatedLevel    : { get: () => Math.floor(Math.sqrt(pts/100))+1, enumerable:true, configurable:true },
+    pointsToNextLevel  : { get: () => { const cl=Math.floor(Math.sqrt(pts/100))+1; return Math.pow(cl,2)*100-pts; }, enumerable:true, configurable:true },
+    levelProgress      : { get: () => { const cl=Math.floor(Math.sqrt(pts/100))+1; const p0=Math.pow(cl-1,2)*100; const p1=Math.pow(cl,2)*100; return Math.min(100,Math.max(0,((pts-p0)/(p1-p0))*100)); }, enumerable:true, configurable:true },
+  });
+  doc.addPoints = async (p, reason='general') => { doc.points=(doc.points||0)+p; doc.level=doc.calculatedLevel; doc.lastUpdated=new Date(); return doc.save(); };
+  doc.awardBadge = async (badgeData) => { if(!(doc.badges||[]).find(b=>b.name===badgeData.name)){ doc.badges=[...(doc.badges||[]),{...badgeData,earnedAt:new Date()}]; doc.lastUpdated=new Date(); return doc.save(); } return doc; };
+  doc.unlockAchievement = async (ach) => { if(!(doc.achievements||[]).find(a=>a.type===ach.type)){ doc.achievements=[...(doc.achievements||[]),{...ach,unlockedAt:new Date()}]; if(ach.points){ doc.points=(doc.points||0)+ach.points; doc.level=doc.calculatedLevel; } doc.lastUpdated=new Date(); return doc.save(); } return doc; };
+  doc.updateStatistics = async (upd) => { doc.statistics=Object.assign(doc.statistics||{},upd); doc.lastUpdated=new Date(); return doc.save(); };
+}
+
+class LeaderboardModel extends BaseModel {
+  constructor() { super('leaderboard', SCALAR_COLS, DEFAULTS, onAfterLoad); }
+  getLeaderboard(opts={}) {
+    const { category='overall', period='all_time', limit=50, page=1 } = opts;
+    return this.find({ category, period }).sort({ points:-1 }).limit(limit).skip((page-1)*limit);
+  }
+  getUserRanking(userId, category='overall', period='all_time') {
+    return this.findOne({ user:userId, category, period });
+  }
+  getTopPerformers(category='overall', limit=10) {
+    return this.find({ category, period:'all_time' }).sort({ points:-1 }).limit(limit);
+  }
+}
+
+const Leaderboard = new LeaderboardModel();
+registerModel('Leaderboard', Leaderboard);
+
+const LeaderboardProxy = new Proxy(Leaderboard, {
+  construct(t, args) { return t.new(args[0]||{}); },
+  get(t, prop)       { return t[prop]; },
+});
+
+module.exports = LeaderboardProxy;
+/* ======= OLD MONGOOSE SCHEMA =======
+_ds5 = { user: {
   points: {
     type: Number,
     default: 0,
@@ -287,4 +340,4 @@ leaderboardEntrySchema.index({ points: -1 });
 leaderboardEntrySchema.index({ rank: 1 });
 leaderboardEntrySchema.index({ lastUpdated: -1 });
 
-module.exports = mongoose.model('Leaderboard', leaderboardEntrySchema);
+======= END OLD SCHEMA */ 

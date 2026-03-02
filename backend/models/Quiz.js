@@ -1,9 +1,48 @@
-const mongoose = require('mongoose');
+/* ── Quiz model (PostgreSQL / Neon) ── */
+const { BaseModel, registerModel } = require('./base');
 
-const questionSchema = new mongoose.Schema({
-  question: {
-    type: String,
-    required: [true, 'Question text is required'],
+const SCALAR_COLS = {
+  course     : 'course_id',
+  instructor : 'instructor_id',
+};
+const DEFAULTS = {
+  questions   : [],
+  attempts    : [],
+  isPublished : false,
+  totalPoints : 0,
+  settings    : { timeLimit:30, passingScore:70, maxAttempts:3, shuffleQuestions:false, shuffleOptions:false, showCorrectAnswers:true, showExplanations:true, allowReview:true },
+  analytics   : { totalAttempts:0, averageScore:0, passRate:0, averageTimeSpent:0 },
+};
+
+function onAfterLoad(doc) {
+  Object.defineProperty(doc, 'questionCount', { get: () => (doc.questions||[]).length, enumerable:true, configurable:true });
+  doc.updateAnalytics = async () => {
+    const completed = (doc.attempts||[]).filter(a => a.completedAt);
+    doc.analytics = {
+      totalAttempts   : completed.length,
+      averageScore    : completed.length ? completed.reduce((s,a)=>s+a.percentage,0)/completed.length : 0,
+      passRate        : completed.length ? (completed.filter(a=>a.passed).length/completed.length)*100 : 0,
+      averageTimeSpent: completed.length ? completed.reduce((s,a)=>s+a.timeSpent,0)/completed.length : 0,
+    };
+    return doc.save({ validateBeforeSave:false });
+  };
+}
+
+class QuizModel extends BaseModel {
+  constructor() { super('quizzes', SCALAR_COLS, DEFAULTS, onAfterLoad); }
+}
+
+const Quiz = new QuizModel();
+registerModel('Quiz', Quiz);
+
+const QuizProxy = new Proxy(Quiz, {
+  construct(t, args) { return t.new(args[0]||{}); },
+  get(t, prop)       { return t[prop]; },
+});
+
+module.exports = QuizProxy;
+/* ======= OLD MONGOOSE SCHEMA =======
+_ds4 = { question: {
     trim: true
   },
   type: {
@@ -210,4 +249,4 @@ quizSchema.index({ instructor: 1 });
 quizSchema.index({ isPublished: 1 });
 quizSchema.index({ startDate: 1 });
 
-module.exports = mongoose.model('Quiz', quizSchema);
+======= END OLD SCHEMA */ 

@@ -1,13 +1,112 @@
-const mongoose = require('mongoose');
+/* ── User model (PostgreSQL / Neon – Mongoose-compatible API) ── */
 const bcrypt = require('bcryptjs');
+const { BaseModel, registerModel } = require('./base');
 
-const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: [true, 'First name is required'],
-    trim: true,
-    maxlength: [50, 'First name cannot exceed 50 characters']
+const SCALAR_COLS = {
+  email                : 'email',
+  password             : 'password',
+  role                 : 'role',
+  isActive             : 'is_active',
+  isEmailVerified      : 'is_email_verified',
+  lastLogin            : 'last_login',
+  resetPasswordToken   : 'reset_password_token',
+  resetPasswordExpires : 'reset_password_expires',
+};
+
+const DEFAULTS = {
+  role             : 'student',
+  isActive         : true,
+  isEmailVerified  : false,
+  avatar           : '',
+  profile          : {},
+  gamification     : { points: 0, level: 1, badges: [], streak: { current: 0, longest: 0, lastActivity: null } },
+  enrolledCourses  : [],
+  teachingSubjects : [],
+  qualifications   : [],
+  preferences      : {
+    notifications       : { email: true, push: true, assignments: true, announcements: true },
+    emailNotifications  : true,
+    pushNotifications   : true,
+    marketingEmails     : false,
+    profileVisibility   : 'public',
+    language            : 'en',
+    timezone            : 'UTC',
   },
+};
+
+function onAfterLoad(doc) {
+  Object.defineProperties(doc, {
+    fullName       : { get: () => `${doc.firstName||''} ${doc.lastName||''}`.trim(), enumerable:true, configurable:true },
+    totalCourses   : { get: () => (doc.enrolledCourses||[]).length, enumerable:true, configurable:true },
+    bio            : { get: () => doc.profile?.bio            || '', enumerable:true, configurable:true },
+    phone          : { get: () => doc.profile?.phone          || '', enumerable:true, configurable:true },
+    location       : { get: () => doc.profile?.location       || '', enumerable:true, configurable:true },
+    profilePicture : { get: () => doc.profile?.profilePicture || doc.avatar || '', enumerable:true, configurable:true },
+    department     : { get: () => doc.profile?.department     || '', enumerable:true, configurable:true },
+    specialization : { get: () => doc.profile?.specialization || '', enumerable:true, configurable:true },
+    experienceText : { get: () => doc.profile?.experience     || '', enumerable:true, configurable:true },
+    skills         : { get: () => doc.profile?.skills         || [], enumerable:true, configurable:true },
+    achievements   : { get: () => doc.profile?.achievements   || [], enumerable:true, configurable:true },
+    socialLinks    : { get: () => doc.profile?.socialLinks    || {}, enumerable:true, configurable:true },
+    gamificationStats: {
+      get: () => ({ totalPoints: doc.gamification?.points||0, level: doc.gamification?.level||1, badges: doc.gamification?.badges||[], streak: doc.gamification?.streak?.current||0 }),
+      enumerable:true, configurable:true,
+    },
+  });
+  doc.comparePassword = async (candidate) => bcrypt.compare(candidate, doc.password);
+  doc.updateLastLogin  = async () => { doc.lastLogin = new Date(); return doc.save({ validateBeforeSave:false }); };
+  doc.updateStreak     = async () => {
+    if (!doc.gamification) doc.gamification = { ...DEFAULTS.gamification };
+    const s    = doc.gamification.streak || { current:0, longest:0, lastActivity:null };
+    const today = new Date();
+    if (!s.lastActivity) { s.current = 1; }
+    else {
+      const diff = Math.floor((today - new Date(s.lastActivity)) / 86400000);
+      if (diff === 1) { s.current += 1; if (s.current > s.longest) s.longest = s.current; }
+      else if (diff > 1) s.current = 1;
+    }
+    s.lastActivity = today;
+    doc.gamification.streak = s;
+    return doc.save({ validateBeforeSave:false });
+  };
+  doc.addPoints = async (pts) => {
+    if (!doc.gamification) doc.gamification = { ...DEFAULTS.gamification };
+    doc.gamification.points = (doc.gamification.points||0) + pts;
+    doc.gamification.level  = Math.floor(doc.gamification.points/1000)+1;
+    return doc.save({ validateBeforeSave:false });
+  };
+}
+
+class UserModel extends BaseModel {
+  constructor() { super('users', SCALAR_COLS, DEFAULTS, onAfterLoad); }
+
+  async create(data) {
+    if (data.password && !/^\$2[ab]\$/.test(data.password)) {
+      const salt = await bcrypt.genSalt(12);
+      data = { ...data, password: await bcrypt.hash(data.password, salt) };
+    }
+    return super.create(data);
+  }
+
+  async getLeaderboard(limit=10) {
+    return this.find({ role:'student', isActive:true }).sort({ 'gamification.points':-1 }).limit(limit).lean();
+  }
+}
+
+const User = new UserModel();
+registerModel('User', User);
+
+// Allow `new User({})` syntax used in some route files
+const UserProxy = new Proxy(User, {
+  construct(t, args) { return t.new(args[0]||{}); },
+  get(t, prop)       { return t[prop]; },
+});
+
+/* ────────────────────── IGNORE everything below (old schema) ── */
+// The rest of this file is replaced; stop parsing here.
+module.exports = UserProxy;
+/* ======= OLD MONGOOSE SCHEMA (dead code – kept for reference) =======
+_dummySchema = { firstName: {
   lastName: {
     type: String,
     required: [true, 'Last name is required'],
@@ -234,11 +333,8 @@ const userSchema = new mongoose.Schema({
       default: 'UTC'
     }
   }
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+};
+// schema options (dead code - never executed)
 
 // Virtual for full name
 userSchema.virtual('fullName').get(function() {
@@ -387,4 +483,4 @@ userSchema.index({ role: 1 });
 userSchema.index({ 'gamification.points': -1 });
 userSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('User', userSchema);
+======= END OLD SCHEMA */ 

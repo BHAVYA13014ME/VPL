@@ -1,8 +1,30 @@
-const mongoose = require('mongoose');
+/* ── ChatRoom model (PostgreSQL / Neon) ── */
+const { BaseModel, registerModel } = require('./base');
 
-const messageSchema = new mongoose.Schema({
-  sender: {
-    type: mongoose.Schema.Types.ObjectId,
+const DEFAULTS = {
+  type         : 'group',
+  participants : [],
+  messages     : [],
+  isActive     : true,
+  isArchived   : false,
+  settings     : { maxParticipants:100, allowFileSharing:true, allowVoiceMessages:true },
+};
+
+class ChatRoomModel extends BaseModel {
+  constructor() { super('chat_rooms', {}, DEFAULTS, null); }
+}
+
+const ChatRoom = new ChatRoomModel();
+registerModel('ChatRoom', ChatRoom);
+
+const ChatRoomProxy = new Proxy(ChatRoom, {
+  construct(t, args) { return t.new(args[0]||{}); },
+  get(t, prop)       { return t[prop]; },
+});
+
+module.exports = ChatRoomProxy;
+/* ======= OLD MONGOOSE SCHEMA =======
+_ds6 = { sender: {
     ref: 'User',
     required: true
   },
@@ -424,4 +446,4 @@ chatRoomSchema.index({ type: 1 });
 chatRoomSchema.index({ lastActivity: -1 });
 chatRoomSchema.index({ isActive: 1 });
 
-module.exports = mongoose.model('ChatRoom', chatRoomSchema);
+======= END OLD SCHEMA */ 

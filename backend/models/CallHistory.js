@@ -1,8 +1,48 @@
-const mongoose = require('mongoose');
+/* ── CallHistory model (PostgreSQL / Neon) ── */
+const { BaseModel, registerModel } = require('./base');
 
-const callHistorySchema = new mongoose.Schema({
-  caller: {
-    type: mongoose.Schema.Types.ObjectId,
+const SCALAR_COLS = {
+  callId   : 'call_id',
+  caller   : 'caller_id',
+  receiver : 'receiver_id',
+};
+const DEFAULTS = {
+  duration : 0,
+  status   : 'completed',
+};
+
+function onAfterLoad(doc) {
+  doc.formatDuration = () => { const m=Math.floor((doc.duration||0)/60); const s=(doc.duration||0)%60; return `${m}:${String(s).padStart(2,'0')}`; };
+}
+
+class CallHistoryModel extends BaseModel {
+  constructor() { super('call_history', SCALAR_COLS, DEFAULTS, onAfterLoad); }
+  async getCallHistoryForUser(userId, page=1, limit=50) {
+    const skip = (page-1)*limit;
+    const calls = await this.find({ $or:[{caller:userId},{receiver:userId}] }).sort({createdAt:-1}).limit(limit).skip(skip).populate('caller','firstName lastName avatar').populate('receiver','firstName lastName avatar');
+    const total = await this.countDocuments({ $or:[{caller:userId},{receiver:userId}] });
+    return {
+      calls: calls.map(c => {
+        const isIncoming = (c.receiver?._id||c.receiver) === userId;
+        const other = isIncoming ? c.caller : c.receiver;
+        return { _id:c._id, callId:c.callId, type:c.callType, status:c.status, direction:isIncoming?'incoming':'outgoing', otherUser:{ _id:other?._id, name:`${other?.firstName||''} ${other?.lastName||''}`.trim(), avatar:other?.avatar }, startTime:c.startTime, endTime:c.endTime, duration:c.duration };
+      }),
+      total, page, pages: Math.ceil(total/limit),
+    };
+  }
+}
+
+const CallHistory = new CallHistoryModel();
+registerModel('CallHistory', CallHistory);
+
+const CallHistoryProxy = new Proxy(CallHistory, {
+  construct(t, args) { return t.new(args[0]||{}); },
+  get(t, prop)       { return t[prop]; },
+});
+
+module.exports = CallHistoryProxy;
+/* ======= OLD MONGOOSE SCHEMA =======
+_ds7 = { caller: {
     ref: 'User',
     required: true
   },
@@ -123,4 +163,4 @@ callHistorySchema.statics.recordCall = async function(callData) {
   }
 };
 
-module.exports = mongoose.model('CallHistory', callHistorySchema);
+======= END OLD SCHEMA */ 
