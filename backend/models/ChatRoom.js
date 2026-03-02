@@ -1,449 +1,183 @@
-/* ── ChatRoom model (PostgreSQL / Neon) ── */
-const { BaseModel, registerModel } = require('./base');
+const mongoose = require('mongoose');
 
-const DEFAULTS = {
-  type         : 'group',
-  participants : [],
-  messages     : [],
-  isActive     : true,
-  isArchived   : false,
-  settings     : { maxParticipants:100, allowFileSharing:true, allowVoiceMessages:true },
-};
+const attachmentSchema = new mongoose.Schema({
+  filename: String, originalName: String, path: String,
+  size: Number, mimeType: String, uploadedAt: { type: Date, default: Date.now },
+}, { _id: false });
 
-class ChatRoomModel extends BaseModel {
-  constructor() { super('chat_rooms', {}, DEFAULTS, null); }
-}
+const messageSchema = new mongoose.Schema({
+  sender:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  content: { type: String, required: true, maxlength: 5000 },
+  type:    { type: String, enum: ['text','image','file','video','audio','system','announcement'], default: 'text' },
+  attachments: [attachmentSchema],
+  status:      { type: String, enum: ['sending','sent','delivered','read'], default: 'sending' },
+  deliveredTo: [{ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, deliveredAt: { type: Date, default: Date.now } }],
+  readBy:      [{ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, readAt: { type: Date, default: Date.now } }],
+  editedAt:    Date,
+  deletedAt:   Date,
+  isDeleted:   { type: Boolean, default: false },
+  deletedFor:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  isStarred:   [{ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, starredAt: { type: Date, default: Date.now } }],
+  reactions:   [{ user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, emoji: String, createdAt: { type: Date, default: Date.now } }],
+  replyTo:     { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
+  forwardedFrom: { _id: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' }, roomName: String },
+  mentions:    [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+}, { timestamps: true });
 
-const ChatRoom = new ChatRoomModel();
-registerModel('ChatRoom', ChatRoom);
-
-const ChatRoomProxy = new Proxy(ChatRoom, {
-  construct(t, args) { return t.new(args[0]||{}); },
-  get(t, prop)       { return t[prop]; },
-});
-
-module.exports = ChatRoomProxy;
-/* ======= OLD MONGOOSE SCHEMA =======
-_ds6 = { sender: {
-    ref: 'User',
-    required: true
-  },
-  content: {
-    type: String,
-    required: [true, 'Message content is required'],
-    maxlength: [5000, 'Message cannot exceed 5000 characters']
-  },
-  type: {
-    type: String,
-    enum: ['text', 'image', 'file', 'video', 'audio', 'system', 'announcement'],
-    default: 'text'
-  },
-  attachments: [{
-    filename: String,
-    originalName: String,
-    path: String,
-    size: Number,
-    mimeType: String,
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  // WhatsApp-like delivery status
-  status: {
-    type: String,
-    enum: ['sending', 'sent', 'delivered', 'read'],
-    default: 'sending'
-  },
-  deliveredTo: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    deliveredAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  readBy: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    readAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  editedAt: Date,
-  deletedAt: Date,
-  isDeleted: {
-    type: Boolean,
-    default: false
-  },
-  deletedFor: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  isStarred: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    starredAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  reactions: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    emoji: String,
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
-  replyTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Message'
-  },
-  forwardedFrom: {
-    _id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Message'
-    },
-    roomName: String
-  },
-  mentions: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }]
-}, {
-  timestamps: true
-});
+const participantSchema = new mongoose.Schema({
+  user:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  role:      { type: String, enum: ['admin','moderator','member'], default: 'member' },
+  joinedAt:  { type: Date, default: Date.now },
+  lastSeen:  { type: Date, default: Date.now },
+  notifications: { type: Boolean, default: true },
+  isTyping:  { type: Boolean, default: false },
+  customNotificationSound: String,
+  pinnedMessages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
+}, { _id: false });
 
 const chatRoomSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Chat room name is required'],
-    trim: true,
-    maxlength: [100, 'Chat room name cannot exceed 100 characters']
-  },
-  description: {
-    type: String,
-    maxlength: [500, 'Chat room description cannot exceed 500 characters']
-  },
-  type: {
-    type: String,
-    enum: ['direct', 'group', 'course', 'announcement'],
-    required: true
-  },
-  course: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course'
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  participants: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    role: {
-      type: String,
-      enum: ['admin', 'moderator', 'member'],
-      default: 'member'
-    },
-    joinedAt: {
-      type: Date,
-      default: Date.now
-    },
-    lastSeen: {
-      type: Date,
-      default: Date.now
-    },
-    notifications: {
-      type: Boolean,
-      default: true
-    },
-    isTyping: {
-      type: Boolean,
-      default: false
-    },
-    customNotificationSound: String,
-    pinnedMessages: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Message'
-    }]
-  }],
-  messages: [messageSchema],
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  isArchived: {
-    type: Boolean,
-    default: false
-  },
-  archivedBy: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
-  blockedUsers: [{
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    blockedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    blockedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
+  name:        { type: String, required: [true, 'Chat room name is required'], trim: true, maxlength: 100 },
+  description: { type: String, maxlength: 500 },
+  type:        { type: String, enum: ['direct','group','course','announcement'], required: true },
+  course:      { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+  createdBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  participants: [participantSchema],
+  messages:    [messageSchema],
+  isActive:    { type: Boolean, default: true },
+  isArchived:  { type: Boolean, default: false },
+  archivedBy:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  blockedUsers:[{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   settings: {
-    allowFileSharing: {
-      type: Boolean,
-      default: true
-    },
-    allowOnlyAdmins: {
-      type: Boolean,
-      default: false
-    },
-    allowEditMessages: {
-      type: Boolean,
-      default: true
-    },
-    allowDeleteMessages: {
-      type: Boolean,
-      default: true
-    },
-    maxFileSize: {
-      type: Number, // in MB
-      default: 10
-    },
-    allowedFileTypes: [String],
-    messageRetention: {
-      type: Number, // in days, 0 means forever
-      default: 0
-    },
-    disappearingMessages: {
-      enabled: {
-        type: Boolean,
-        default: false
-      },
-      duration: {
-        type: Number, // in seconds
-        default: 0
-      }
-    }
+    maxParticipants:   { type: Number, default: 100 },
+    allowFileSharing:  { type: Boolean, default: true },
+    allowVoiceMessages:{ type: Boolean, default: true },
   },
-  lastActivity: {
-    type: Date,
-    default: Date.now
-  },
-  avatar: {
-    type: String,
-    default: ''
-  },
-  wallpaper: {
-    type: String,
-    default: ''
-  },
-  pinnedBy: {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    pinnedAt: Date
-  }
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+}, { timestamps: true });
 
-// Virtual for total messages
-chatRoomSchema.virtual('totalMessages').get(function() {
-  return this.messages ? this.messages.filter(msg => !msg.isDeleted).length : 0;
-});
-
-// Virtual for unread messages count (would need user context)
-chatRoomSchema.virtual('unreadCount').get(function() {
-  // This would be calculated per user in the application logic
-  return 0;
-});
-
-// Virtual for online participants count
-chatRoomSchema.virtual('onlineCount').get(function() {
-  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-  return this.participants ? this.participants.filter(p => p.lastSeen > fiveMinutesAgo).length : 0;
-});
-
-// Method to add participant
-chatRoomSchema.methods.addParticipant = function(userId, role = 'member') {
-  const existingParticipant = this.participants.find(p => p.user.toString() === userId.toString());
-  
-  if (existingParticipant) {
-    throw new Error('User is already a participant');
-  }
-  
-  this.participants.push({
-    user: userId,
-    role: role
-  });
-  
-  return this.save();
-};
-
-// Method to remove participant
-chatRoomSchema.methods.removeParticipant = function(userId) {
-  this.participants = this.participants.filter(p => p.user.toString() !== userId.toString());
-  return this.save();
-};
-
-// Method to add message
-chatRoomSchema.methods.addMessage = function(messageData) {
-  // Check if user is participant
-  const isParticipant = this.participants.some(p => p.user.toString() === messageData.sender.toString());
-  
-  if (!isParticipant && this.type !== 'announcement') {
-    throw new Error('User is not a participant in this chat room');
-  }
-  
-  // Check if only admins can send messages
-  if (this.settings.allowOnlyAdmins) {
-    const participant = this.participants.find(p => p.user.toString() === messageData.sender.toString());
-    if (!participant || (participant.role !== 'admin' && participant.role !== 'moderator')) {
-      throw new Error('Only admins and moderators can send messages in this room');
-    }
-  }
-  
-  this.messages.push(messageData);
-  this.lastActivity = new Date();
-  
-  return this.save();
-};
-
-// Method to update last seen for a user
-chatRoomSchema.methods.updateLastSeen = function(userId) {
-  if (!userId) {
-    return Promise.resolve(this);
-  }
-  
-  const participant = this.participants.find(p => p.user && p.user.toString() === userId.toString());
-  
+// Instance: update the lastSeen timestamp for a participant
+chatRoomSchema.methods.updateLastSeen = async function (userId) {
+  const userIdStr = userId.toString();
+  const participant = this.participants.find(
+    (p) => p.user && p.user.toString() === userIdStr
+  );
   if (participant) {
     participant.lastSeen = new Date();
-    return this.save({ validateBeforeSave: false });
+    await this.save();
   }
-  
-  return Promise.resolve(this);
 };
 
-// Method to mark messages as read
-chatRoomSchema.methods.markAsRead = function(userId, messageIds = []) {
-  const messagesToUpdate = messageIds.length > 0 
-    ? this.messages.filter(msg => messageIds.includes(msg._id.toString()))
-    : this.messages;
-  
-  messagesToUpdate.forEach(message => {
-    const alreadyRead = message.readBy.some(read => read.user.toString() === userId.toString());
+// Instance: add a new participant (skip if already present)
+chatRoomSchema.methods.addParticipant = async function (userId, role = 'member') {
+  const userIdStr = userId.toString();
+  const alreadyIn = this.participants.some(
+    (p) => p.user && p.user.toString() === userIdStr
+  );
+  if (alreadyIn) return;
+  this.participants.push({ user: userId, role });
+  await this.save();
+};
+
+// Instance: remove a participant by userId
+chatRoomSchema.methods.removeParticipant = async function (userId) {
+  const userIdStr = userId.toString();
+  this.participants = this.participants.filter(
+    (p) => !p.user || p.user.toString() !== userIdStr
+  );
+  await this.save();
+};
+
+// Instance: append a message to the messages array
+chatRoomSchema.methods.addMessage = async function (messageData) {
+  this.messages.push(messageData);
+  await this.save();
+};
+
+// Instance: mark messages as read by userId
+// If messageIds array is provided, only those messages are marked; otherwise all unread.
+chatRoomSchema.methods.markAsRead = async function (userId, messageIds) {
+  const userIdStr = userId.toString();
+  const now = new Date();
+
+  this.messages.forEach((msg) => {
+    if (msg.isDeleted) return;
+
+    // If specific IDs given, only mark those
+    if (messageIds && messageIds.length > 0) {
+      if (!messageIds.includes(msg._id.toString())) return;
+    }
+
+    // Skip messages sent by the user themselves
+    const senderId = msg.sender ? msg.sender.toString() : '';
+    if (senderId === userIdStr) return;
+
+    const alreadyRead = msg.readBy.some((r) => {
+      const rid = r.user ? r.user.toString() : '';
+      return rid === userIdStr;
+    });
     if (!alreadyRead) {
-      message.readBy.push({
-        user: userId,
-        readAt: new Date()
-      });
+      msg.readBy.push({ user: userId, readAt: now });
     }
   });
-  
-  return this.save({ validateBeforeSave: false });
+
+  await this.save();
 };
 
-// Method to get unread messages for a user
-chatRoomSchema.methods.getUnreadMessages = function(userId) {
-  return this.messages.filter(message => 
-    !message.isDeleted && 
-    message.sender.toString() !== userId.toString() &&
-    !message.readBy.some(read => read.user.toString() === userId.toString())
-  );
-};
-
-// Static method to get user's chat rooms
-chatRoomSchema.statics.getUserChatRooms = function(userId) {
+// Static: return all active chat rooms a user participates in
+chatRoomSchema.statics.getUserChatRooms = async function (userId) {
   return this.find({
     'participants.user': userId,
-    isActive: true
+    isActive: true,
   })
-  .populate('participants.user', 'firstName lastName avatar')
-  .populate('course', 'title')
-  .sort({ lastActivity: -1 })
-  .select('-messages')
-  .lean();
+    .populate('participants.user', 'firstName lastName avatar email')
+    .populate('messages.sender', 'firstName lastName avatar')
+    .populate('course', 'title')
+    .sort({ updatedAt: -1 })
+    .lean();
 };
 
-// Static method to create direct chat between two users
-chatRoomSchema.statics.createDirectChat = function(user1Id, user2Id) {
-  // Check if direct chat already exists
-  return this.findOne({
+// Static: find or create a 1-to-1 direct chat between two users
+chatRoomSchema.statics.createDirectChat = async function (userId1, userId2) {
+  // Look for an existing direct chat that contains exactly these two participants
+  const existing = await this.findOne({
     type: 'direct',
-    $and: [
-      { 'participants.user': user1Id },
-      { 'participants.user': user2Id }
-    ]
-  }).then(existingChat => {
-    if (existingChat) {
-      return existingChat;
-    }
-    
-    // Create new direct chat
-    return this.create({
-      name: 'Direct Chat',
-      type: 'direct',
-      participants: [
-        { user: user1Id, role: 'member' },
-        { user: user2Id, role: 'member' }
-      ]
-    });
+    isActive: true,
+    'participants.user': { $all: [userId1, userId2] },
+    $expr: { $eq: [{ $size: '$participants' }, 2] },
+  });
+  if (existing) return existing;
+
+  const room = await this.create({
+    name: 'Direct Chat',
+    type: 'direct',
+    participants: [
+      { user: userId1, role: 'admin' },
+      { user: userId2, role: 'admin' },
+    ],
+    createdBy: userId1,
+  });
+  return room;
+};
+
+// Instance: return messages not yet read by userId
+chatRoomSchema.methods.getUnreadMessages = function (userId) {
+  const userIdStr = userId.toString();
+  return this.messages.filter((msg) => {
+    if (msg.isDeleted) return false;
+    if (!msg.sender) return false;
+    const senderId = msg.sender._id
+      ? msg.sender._id.toString()
+      : msg.sender.toString();
+    if (senderId === userIdStr) return false; // own messages are not "unread"
+    const hasRead =
+      Array.isArray(msg.readBy) &&
+      msg.readBy.some((r) => {
+        const rid = r.user && r.user._id
+          ? r.user._id.toString()
+          : (r.user ? r.user.toString() : '');
+        return rid === userIdStr;
+      });
+    return !hasRead;
   });
 };
 
-// Static method to create course chat room
-chatRoomSchema.statics.createCourseChat = function(courseId, name, description) {
-  return this.create({
-    name: name || 'Course Discussion',
-    description,
-    type: 'course',
-    course: courseId,
-    participants: [], // Will be populated when users join the course
-    settings: {
-      allowFileSharing: true,
-      allowOnlyAdmins: false
-    }
-  });
-};
-
-// Pre-save middleware to update last activity
-chatRoomSchema.pre('save', function(next) {
-  if (this.isModified('messages')) {
-    this.lastActivity = new Date();
-  }
-  next();
-});
-
-// Indexes for performance
-chatRoomSchema.index({ 'participants.user': 1 });
-chatRoomSchema.index({ course: 1 });
-chatRoomSchema.index({ type: 1 });
-chatRoomSchema.index({ lastActivity: -1 });
-chatRoomSchema.index({ isActive: 1 });
-
-======= END OLD SCHEMA */ 
+module.exports = mongoose.model('ChatRoom', chatRoomSchema);

@@ -279,10 +279,20 @@ const AssignmentDetail: React.FC = () => {
     setViewSubmissionDialog(true);
   };
 
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+
+  // Normalize a file path from DB (may be absolute Windows path or /uploads/...) to a full URL
+  const toFileUrl = (filePath: string): string => {
+    const normalized = filePath.replace(/\\/g, '/');
+    const idx = normalized.indexOf('/uploads/');
+    const relativePath = idx !== -1 ? normalized.slice(idx) : ('/' + normalized);
+    return `${BACKEND_URL}${relativePath}`;
+  };
+
   const handleDownloadFile = async (filePath: string, fileName: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}${filePath}`, {
+      const response = await axios.get(toFileUrl(filePath), {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob'
       });
@@ -839,8 +849,7 @@ const AssignmentDetail: React.FC = () => {
                             />
                             <Button
                               startIcon={<DownloadIcon />}
-                              href={attachment.path}
-                              target="_blank"
+                              onClick={() => handleDownloadFile(attachment.path, attachment.originalName || attachment.filename)}
                             >
                               Download
                             </Button>
@@ -1291,8 +1300,7 @@ const AssignmentDetail: React.FC = () => {
                                     variant="contained"
                                     color="primary"
                                     onClick={() => {
-                                      const fileUrl = `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}${file.path}`;
-                                      window.open(fileUrl, '_blank');
+                                      window.open(toFileUrl(file.path), '_blank');
                                     }}
                                   >
                                     View
@@ -1313,7 +1321,7 @@ const AssignmentDetail: React.FC = () => {
                             {isImage && (
                               <Box sx={{ mt: 2, textAlign: 'center' }}>
                                 <img 
-                                  src={`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}${file.path}`}
+                                  src={toFileUrl(file.path)}
                                   alt={file.originalName || file.filename}
                                   style={{ 
                                     maxWidth: '100%', 

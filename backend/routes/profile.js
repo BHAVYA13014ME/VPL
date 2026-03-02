@@ -9,13 +9,13 @@ const path = require('path');
 const fs = require('fs');
 
 // Configure multer for profile picture uploads
+const PROFILE_UPLOADS = path.join(__dirname, '..', 'uploads', 'profiles');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = 'uploads/profiles/';
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
+    if (!fs.existsSync(PROFILE_UPLOADS)) {
+      fs.mkdirSync(PROFILE_UPLOADS, { recursive: true });
     }
-    cb(null, uploadPath);
+    cb(null, PROFILE_UPLOADS);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

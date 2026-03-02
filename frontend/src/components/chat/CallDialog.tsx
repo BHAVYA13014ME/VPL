@@ -38,7 +38,11 @@ interface CallDialogProps {
   onAnswer?: () => void;
   onDecline?: () => void;
   onEndCall?: () => void;
+  onToggleMute?: (muted: boolean) => void;
+  onToggleVideo?: (videoOff: boolean) => void;
   duration?: number;
+  localVideoRef?: React.RefObject<HTMLVideoElement>;
+  remoteVideoRef?: React.RefObject<HTMLVideoElement>;
 }
 
 const Transition = React.forwardRef(function Transition(
@@ -57,15 +61,33 @@ export const CallDialog: React.FC<CallDialogProps> = ({
   onAnswer,
   onDecline,
   onEndCall,
+  onToggleMute,
+  onToggleVideo,
   duration = 0,
+  localVideoRef: externalLocalRef,
+  remoteVideoRef: externalRemoteRef,
 }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(callType === 'voice');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSpeakerOn, setIsSpeakerOn] = useState(callType === 'video');
 
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const internalLocalRef = useRef<HTMLVideoElement>(null);
+  const internalRemoteRef = useRef<HTMLVideoElement>(null);
+  const localVideoRef = externalLocalRef || internalLocalRef;
+  const remoteVideoRef = externalRemoteRef || internalRemoteRef;
+
+  const handleToggleMute = () => {
+    const next = !isMuted;
+    setIsMuted(next);
+    onToggleMute?.(next);
+  };
+
+  const handleToggleVideo = () => {
+    const next = !isVideoOff;
+    setIsVideoOff(next);
+    onToggleVideo?.(next);
+  };
 
   const participantData = participant || { _id: 'unknown', firstName: 'Unknown', lastName: 'User', avatar: undefined };
 
@@ -214,7 +236,7 @@ export const CallDialog: React.FC<CallDialogProps> = ({
         {(callState === 'connected' || callState === 'outgoing') && (
           <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.08)', p: 3, display: 'flex', justifyContent: 'center', gap: 2.5, zIndex: 10 }}>
             <Box sx={{ textAlign: 'center' }}>
-              <IconButton onClick={() => setIsMuted(!isMuted)} sx={ctrlBtnSx(isMuted, isMuted)}>
+              <IconButton onClick={handleToggleMute} sx={ctrlBtnSx(isMuted, isMuted)}>
                 {isMuted ? <MicOff /> : <Mic />}
               </IconButton>
               <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'rgba(232,220,196,0.6)' }}>{isMuted ? 'Unmute' : 'Mute'}</Typography>
@@ -222,7 +244,7 @@ export const CallDialog: React.FC<CallDialogProps> = ({
 
             {callType === 'video' && (
               <Box sx={{ textAlign: 'center' }}>
-                <IconButton onClick={() => setIsVideoOff(!isVideoOff)} sx={ctrlBtnSx(isVideoOff, isVideoOff)}>
+                <IconButton onClick={handleToggleVideo} sx={ctrlBtnSx(isVideoOff, isVideoOff)}>
                   {isVideoOff ? <VideocamOff /> : <Videocam />}
                 </IconButton>
                 <Typography variant="caption" sx={{ display: 'block', mt: 0.5, color: 'rgba(232,220,196,0.6)' }}>{isVideoOff ? 'Start Video' : 'Stop Video'}</Typography>

@@ -267,6 +267,8 @@ const WhatsAppChat: React.FC = () => {
   const [currentCallType, setCurrentCallType] = useState<'voice' | 'video'>('voice');
   const [currentCallParticipant, setCurrentCallParticipant] = useState<any>(null);
   const [showCallHistory, setShowCallHistory] = useState(false);
+  const [callPickerOpen, setCallPickerOpen] = useState(false);
+  const [pendingCallType, setPendingCallType] = useState<'voice' | 'video'>('voice');
 
   // WebRTC hook
   const {
@@ -277,6 +279,10 @@ const WhatsAppChat: React.FC = () => {
     answerCall,
     declineCall,
     endCall,
+    localVideoRef: webRTCLocalRef,
+    remoteVideoRef: webRTCRemoteRef,
+    toggleAudio,
+    toggleVideo,
   } = useWebRTC({
     roomId: selectedRoom?._id || '',
     userId: user?._id || '',
@@ -714,7 +720,8 @@ const WhatsAppChat: React.FC = () => {
         initiateCall(otherUser, 'voice');
       }
     } else {
-      showNotification('Group calls not supported yet', 'info');
+      setPendingCallType('voice');
+      setCallPickerOpen(true);
     }
   };
 
@@ -729,8 +736,16 @@ const WhatsAppChat: React.FC = () => {
         initiateCall(otherUser, 'video');
       }
     } else {
-      showNotification('Group calls not supported yet', 'info');
+      setPendingCallType('video');
+      setCallPickerOpen(true);
     }
+  };
+
+  const handleCallPickerSelect = (participant: Participant) => {
+    setCallPickerOpen(false);
+    setCurrentCallType(pendingCallType);
+    setCurrentCallParticipant(participant.user);
+    initiateCall(participant.user, pendingCallType);
   };
 
   const handleAnswerCall = () => {
@@ -1514,7 +1529,6 @@ const WhatsAppChat: React.FC = () => {
                   <IconButton 
                     sx={{ color: '#aebac1' }}
                     onClick={handleVideoCall}
-                    disabled={selectedRoom?.type !== 'direct'}
                   >
                     <Videocam />
                   </IconButton>
@@ -1523,7 +1537,6 @@ const WhatsAppChat: React.FC = () => {
                   <IconButton 
                     sx={{ color: '#aebac1' }}
                     onClick={handleVoiceCall}
-                    disabled={selectedRoom?.type !== 'direct'}
                   >
                     <Call />
                   </IconButton>
@@ -2406,7 +2419,11 @@ const WhatsAppChat: React.FC = () => {
         onAnswer={handleAnswerCall}
         onDecline={handleDeclineCall}
         onEndCall={handleEndCall}
+        onToggleMute={(muted) => toggleAudio(!muted)}
+        onToggleVideo={(videoOff) => toggleVideo(!videoOff)}
         duration={callDuration}
+        localVideoRef={webRTCLocalRef}
+        remoteVideoRef={webRTCRemoteRef}
       />
 
       {/* Call History Dialog */}
@@ -2426,6 +2443,70 @@ const WhatsAppChat: React.FC = () => {
         <CallHistory
           onCallParticipant={handleCallFromHistory}
         />
+      </Dialog>
+
+      {/* Participant Picker Dialog (for group calls) */}
+      <Dialog
+        open={callPickerOpen}
+        onClose={() => setCallPickerOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: '#1f2c34',
+            color: 'white',
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: 'white', borderBottom: '1px solid #2a3942' }}>
+          {pendingCallType === 'video' ? 'Start Video Call with...' : 'Start Voice Call with...'}
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <List>
+            {selectedRoom?.participants
+              .filter(p => p.user._id !== user?._id)
+              .map(p => (
+                <ListItem key={p.user._id} disablePadding>
+                  <ListItemButton
+                    onClick={() => handleCallPickerSelect(p)}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      '&:hover': { bgcolor: '#2a3942' }
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar
+                        src={p.user.avatar ? `${API_BASE_URL}${p.user.avatar}` : undefined}
+                        sx={{ bgcolor: '#00a884', width: 40, height: 40 }}
+                      >
+                        {p.user.firstName?.[0]?.toUpperCase()}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={`${p.user.firstName} ${p.user.lastName}`}
+                      secondary={p.user.email}
+                      primaryTypographyProps={{ color: 'white', fontWeight: 500 }}
+                      secondaryTypographyProps={{ color: '#8696a0', fontSize: '0.75rem' }}
+                    />
+                    <IconButton
+                      size="small"
+                      sx={{ color: '#00a884' }}
+                      onClick={(e) => { e.stopPropagation(); handleCallPickerSelect(p); }}
+                    >
+                      {pendingCallType === 'video' ? <Videocam /> : <Call />}
+                    </IconButton>
+                  </ListItemButton>
+                </ListItem>
+              ))
+            }
+          </List>
+        </DialogContent>
+        <DialogActions sx={{ borderTop: '1px solid #2a3942' }}>
+          <Button onClick={() => setCallPickerOpen(false)} sx={{ color: '#8696a0' }}>
+            Cancel
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Snackbar */}

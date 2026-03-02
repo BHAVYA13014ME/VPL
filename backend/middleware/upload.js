@@ -3,34 +3,48 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure upload directories exist
+// Base uploads directory (absolute path relative to this file)
+const UPLOADS_BASE = path.join(__dirname, '..', 'uploads');
+
 const ensureDirectoryExists = (dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 };
 
+// Helper: convert an absolute file path returned by multer to a web-accessible URL path (/uploads/...)
+const filePathToUrl = (filePath) => {
+  const normalized = filePath.replace(/\\/g, '/');
+  const idx = normalized.indexOf('/uploads/');
+  return idx !== -1 ? normalized.slice(idx) : ('/' + normalized);
+};
+
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    let uploadPath = 'uploads/';
-    
-    // Organize files by type
+    // Organize files by type into sub-folders
+    let subDir;
     if (file.mimetype.startsWith('image/')) {
-      uploadPath += 'images/';
+      subDir = 'images';
     } else if (file.mimetype.startsWith('video/')) {
-      uploadPath += 'videos/';
+      subDir = 'videos';
     } else if (file.mimetype === 'application/pdf') {
-      uploadPath += 'pdfs/';
+      subDir = 'pdfs';
     } else if (file.mimetype.includes('document') || file.mimetype.includes('text')) {
-      uploadPath += 'documents/';
+      subDir = 'documents';
     } else {
-      uploadPath += 'others/';
+      subDir = 'others';
     }
-    
-    // Further organize by date
+
+    // Further organize by year/month
     const date = new Date();
-    uploadPath += `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/`;
-    
+    const uploadPath = path.join(
+      UPLOADS_BASE,
+      subDir,
+      String(date.getFullYear()),
+      String(date.getMonth() + 1).padStart(2, '0')
+    );
+
     ensureDirectoryExists(uploadPath);
     cb(null, uploadPath);
   },
@@ -103,7 +117,7 @@ const uploadConfigs = {
   avatar: multer({
     storage: multer.diskStorage({
       destination: function (req, file, cb) {
-        const uploadPath = 'uploads/avatars/';
+        const uploadPath = path.join(UPLOADS_BASE, 'avatars');
         ensureDirectoryExists(uploadPath);
         cb(null, uploadPath);
       },
@@ -221,6 +235,7 @@ const getFilesInfo = (files) => {
 };
 
 module.exports = {
+  filePathToUrl,
   upload,
   uploadConfigs,
   handleUploadError,

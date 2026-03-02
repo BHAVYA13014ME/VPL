@@ -33,7 +33,7 @@ const getLeaderboard = async (req, res) => {
     // Add position numbers
     const startPosition = (parseInt(page) - 1) * parseInt(limit);
     const leaderboardWithPositions = validLeaderboard.map((entry, index) => ({
-      ...entry,
+      ...(entry.toObject ? entry.toObject() : entry),
       position: startPosition + index + 1
     }));
 
@@ -82,7 +82,7 @@ const getTopPerformers = async (req, res) => {
 
     // Add position numbers
     const topPerformersWithPositions = validTopPerformers.map((entry, index) => ({
-      ...entry,
+      ...(entry.toObject ? entry.toObject() : entry),
       position: index + 1
     }));
 

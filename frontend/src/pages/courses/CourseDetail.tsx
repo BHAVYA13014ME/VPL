@@ -52,7 +52,20 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import Layout from '../../components/layout/Layout';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
+import { BACKEND_URL } from '../../config/api';
+
+// Normalize a stored file path to a full URL.
+// Handles: correct /uploads/videos/..., bad legacy /uploads/C:/...Windows... paths, and plain relative paths.
+const toFileUrl = (filePath: string): string => {
+  if (!filePath) return '';
+  if (filePath.startsWith('http')) return filePath;
+  const normalized = filePath.replace(/\\/g, '/');
+  // Try to find a known upload-type folder name regardless of what precedes it
+  const m = normalized.match(/(videos|pdfs|images|documents|others|profiles|avatars)\/.+/);
+  if (m) return `${BACKEND_URL}/uploads/${m[0]}`;
+  // Fallback: use the path as-is against the backend origin
+  return `${BACKEND_URL}${normalized.startsWith('/') ? normalized : '/' + normalized}`;
+};
 
 interface Lesson {
   _id: string;
@@ -883,7 +896,7 @@ const CourseDetail: React.FC = () => {
                     <video
                       controls
                       style={{ width: '100%', maxHeight: '400px' }}
-                      src={`${API_BASE_URL}${selectedLesson.videoUrl}`}
+                      src={toFileUrl(selectedLesson.videoUrl)}
                     />
                   </Box>
                 )}
@@ -892,7 +905,7 @@ const CourseDetail: React.FC = () => {
                   <Box sx={{ mb: 2 }}>
                     <Button
                       variant="outlined"
-                      href={`${API_BASE_URL}${selectedLesson.pdfUrl}`}
+                      href={toFileUrl(selectedLesson.pdfUrl)}
                       target="_blank"
                       startIcon={<PdfIcon />}
                     >

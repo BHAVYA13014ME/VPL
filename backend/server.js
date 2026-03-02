@@ -16,7 +16,6 @@ console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('PORT:', process.env.PORT);
 const express = require('express');
-// mongoose removed – using PostgreSQL / Neon via ./db.js
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -101,7 +100,7 @@ app.use('/uploads', (req, res, next) => {
     return res.sendStatus(200);
   }
   next();
-}, express.static('uploads', {
+}, express.static(path.join(__dirname, 'uploads'), {
   setHeaders: (res, filePath) => {
     // Enable range requests for video streaming
     res.set('Accept-Ranges', 'bytes');
@@ -162,11 +161,11 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// PostgreSQL / Neon connection
-const { initSchema } = require('./db');
-initSchema()
-  .then(() => console.log('✅ Neon PostgreSQL connected & schema ready'))
-  .catch(err => { console.error('❌ PostgreSQL init error:', err); process.exit(1); });
+// MongoDB connection
+const { connectDB } = require('./db');
+connectDB()
+  .then(() => console.log('✅ MongoDB connected successfully'))
+  .catch(err => { console.error('❌ MongoDB connection error:', err); process.exit(1); });
 
 const PORT = process.env.PORT || 5000;
 

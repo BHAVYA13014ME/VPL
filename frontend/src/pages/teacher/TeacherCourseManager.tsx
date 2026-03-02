@@ -510,7 +510,7 @@ const TeacherCourseManager: React.FC = () => {
                                     label={`${file.originalName} (${formatFileSize(file.size)})`}
                                     variant="outlined"
                                     component="a"
-                                    href={`${API_BASE_URL}${file.path}`}
+                                    href={(() => { const n = file.path.replace(/\\/g, '/'); const i = n.indexOf('/uploads/'); return `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}${i !== -1 ? n.slice(i) : '/' + n}`; })()}
                                     target="_blank"
                                     clickable
                                   />

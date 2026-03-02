@@ -29,6 +29,7 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const callRoomIdRef = useRef<string>(''); // room used for the active call's signaling
   const { socket } = useSocket();
 
   // Initialize peer connection
@@ -101,8 +102,7 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
     }
   }, []);
 
-  // Start call timer - TODO: integrate this when call connects
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // Start call timer
   const startCallTimer = useCallback(() => {
     if (callTimerRef.current) {
       clearInterval(callTimerRef.current);
@@ -122,12 +122,22 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
     }
   }, []);
 
+  // Auto-start/stop timer based on call state
+  useEffect(() => {
+    if (callState === 'connected') {
+      startCallTimer();
+    } else if (callState === 'ended' || callState === 'idle') {
+      stopCallTimer();
+    }
+  }, [callState, startCallTimer, stopCallTimer]);
+
   // Initiate call
   const initiateCall = useCallback(async (
     participant: CallParticipant, 
     type: 'voice' | 'video'
   ) => {
     try {
+      callRoomIdRef.current = roomId;
       setCallState('outgoing');
       onCallStateChange('outgoing');
       setCurrentCall({ type, participant, isInitiator: true });
@@ -177,10 +187,13 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
 
+      // Use the room from the incoming call's signaling channel
+      const signalingRoomId = callRoomIdRef.current || roomId;
+
       // Send answer via socket
       if (socket) {
         socket.emit('call:answer', {
-          roomId,
+          roomId: signalingRoomId,
           answer,
         });
       }
@@ -266,13 +279,30 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
     const handleCallReceive = (data: {
       type: 'voice' | 'video';
       offer: RTCSessionDescriptionInit;
-      participant: CallParticipant;
+      // backend sends from/fromName/fromAvatar, not participant
+      from?: string;
+      fromName?: string;
+      fromAvatar?: string;
+      participant?: CallParticipant;
+      roomId?: string;
+      callId?: string;
     }) => {
+      // Normalise participant from backend shape
+      const participant: CallParticipant = data.participant || {
+        _id: data.from || 'unknown',
+        firstName: data.fromName?.split(' ')[0] || 'Unknown',
+        lastName: data.fromName?.split(' ').slice(1).join(' ') || '',
+        avatar: data.fromAvatar,
+      };
+
+      // Store the room to use for ICE exchange
+      if (data.roomId) callRoomIdRef.current = data.roomId;
+
       setCallState('incoming');
       onCallStateChange('incoming');
       setCurrentCall({ 
         type: data.type, 
-        participant: data.participant, 
+        participant, 
         isInitiator: false 
       });
 

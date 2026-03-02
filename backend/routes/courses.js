@@ -356,11 +356,12 @@ router.post('/create', auth, isTeacher, uploadConfigs.courseMaterials, [
 
   // Handle file uploads
   if (req.files) {
+    const toUrl = (p) => { const n = p.replace(/\\/g, '/'); const i = n.indexOf('/uploads/'); return i !== -1 ? n.slice(i) : ('/' + n); };
     if (req.files.thumbnail && req.files.thumbnail[0]) {
-      courseData.thumbnail = `/uploads/${req.files.thumbnail[0].path.replace('uploads/', '')}`;
+      courseData.thumbnail = toUrl(req.files.thumbnail[0].path);
     }
     if (req.files.coverImage && req.files.coverImage[0]) {
-      courseData.coverImage = `/uploads/${req.files.coverImage[0].path.replace('uploads/', '')}`;
+      courseData.coverImage = toUrl(req.files.coverImage[0].path);
     }
   }
 
@@ -408,11 +409,12 @@ router.post('/', auth, isTeacher, uploadConfigs.courseMaterials, [
 
   // Handle file uploads
   if (req.files) {
+    const toUrl = (p) => { const n = p.replace(/\\/g, '/'); const i = n.indexOf('/uploads/'); return i !== -1 ? n.slice(i) : ('/' + n); };
     if (req.files.thumbnail && req.files.thumbnail[0]) {
-      courseData.thumbnail = `/uploads/${req.files.thumbnail[0].path.replace('uploads/', '')}`;
+      courseData.thumbnail = toUrl(req.files.thumbnail[0].path);
     }
     if (req.files.coverImage && req.files.coverImage[0]) {
-      courseData.coverImage = `/uploads/${req.files.coverImage[0].path.replace('uploads/', '')}`;
+      courseData.coverImage = toUrl(req.files.coverImage[0].path);
     }
   }
 
@@ -464,11 +466,12 @@ router.put('/:id', auth, isTeacher, uploadConfigs.courseMaterials, [
   // Handle file uploads
   const updateData = { ...req.body };
   if (req.files) {
+    const toUrl = (p) => { const n = p.replace(/\\/g, '/'); const i = n.indexOf('/uploads/'); return i !== -1 ? n.slice(i) : ('/' + n); };
     if (req.files.thumbnail && req.files.thumbnail[0]) {
-      updateData.thumbnail = `/uploads/${req.files.thumbnail[0].path.replace('uploads/', '')}`;
+      updateData.thumbnail = toUrl(req.files.thumbnail[0].path);
     }
     if (req.files.coverImage && req.files.coverImage[0]) {
-      updateData.coverImage = `/uploads/${req.files.coverImage[0].path.replace('uploads/', '')}`;
+      updateData.coverImage = toUrl(req.files.coverImage[0].path);
     }
   }
 
@@ -766,13 +769,20 @@ router.post('/:id/lessons', auth, isTeacher, uploadConfigs.courseMaterials, [
     isPublished: req.body.isPublished === 'true' || req.body.isPublished === true
   };
 
+  // Helper: normalize a multer path (may be absolute on Windows) to /uploads/...
+  const toUploadPath = (p) => {
+    const normalized = p.replace(/\\/g, '/');
+    const m = normalized.match(/uploads\/.+/);
+    return m ? '/' + m[0] : '/' + normalized;
+  };
+
   // Handle file uploads
   if (req.files) {
     if (req.files.video && req.files.video[0]) {
-      lessonData.videoUrl = `/uploads/${req.files.video[0].path.replace(/\\/g, '/').replace('uploads/', '')}`;
+      lessonData.videoUrl = toUploadPath(req.files.video[0].path);
     }
     if (req.files.pdf && req.files.pdf[0]) {
-      lessonData.pdfUrl = `/uploads/${req.files.pdf[0].path.replace(/\\/g, '/').replace('uploads/', '')}`;
+      lessonData.pdfUrl = toUploadPath(req.files.pdf[0].path);
     }
   }
 
@@ -849,13 +859,20 @@ router.put('/:id/lessons/:lessonId', auth, isTeacher, uploadConfigs.courseMateri
     }
   });
 
+  // Helper: normalize a multer path (may be absolute on Windows) to /uploads/...
+  const toUploadPathEdit = (p) => {
+    const normalized = p.replace(/\\/g, '/');
+    const m = normalized.match(/uploads\/.+/);
+    return m ? '/' + m[0] : '/' + normalized;
+  };
+
   // Handle file uploads
   if (req.files) {
     if (req.files.video && req.files.video[0]) {
-      course.lessons[lessonIndex].videoUrl = `/uploads/${req.files.video[0].path.replace(/\\/g, '/').replace('uploads/', '')}`;
+      course.lessons[lessonIndex].videoUrl = toUploadPathEdit(req.files.video[0].path);
     }
     if (req.files.pdf && req.files.pdf[0]) {
-      course.lessons[lessonIndex].pdfUrl = `/uploads/${req.files.pdf[0].path.replace(/\\/g, '/').replace('uploads/', '')}`;
+      course.lessons[lessonIndex].pdfUrl = toUploadPathEdit(req.files.pdf[0].path);
     }
   }
 

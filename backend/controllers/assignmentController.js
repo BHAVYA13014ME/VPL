@@ -53,14 +53,19 @@ const createAssignment = async (req, res) => {
 
     // Handle file attachments from multer
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-      assignmentData.attachments = req.files.map(file => ({
-        filename: file.filename,
-        originalName: file.originalname,
-        path: `/${file.path.replace(/\\/g, '/')}`,
-        size: file.size,
-        mimeType: file.mimetype,
-        uploadedAt: new Date()
-      }));
+      assignmentData.attachments = req.files.map(file => {
+        const normalized = file.path.replace(/\\/g, '/');
+        const uploadsIdx = normalized.indexOf('/uploads/');
+        const urlPath = uploadsIdx !== -1 ? normalized.slice(uploadsIdx) : ('/' + normalized);
+        return {
+          filename: file.filename,
+          originalName: file.originalname,
+          path: urlPath,
+          size: file.size,
+          mimeType: file.mimetype,
+          uploadedAt: new Date()
+        };
+      });
     } else if (attachment) {
       // Fallback for string attachment URL
       assignmentData.attachments = [{
@@ -517,10 +522,13 @@ const submitAssignment = async (req, res) => {
     const attachments = [];
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       req.files.forEach(file => {
+        const normalized = file.path.replace(/\\/g, '/');
+        const uploadsIdx = normalized.indexOf('/uploads/');
+        const urlPath = uploadsIdx !== -1 ? normalized.slice(uploadsIdx) : ('/' + normalized);
         attachments.push({
           filename: file.filename,
           originalName: file.originalname,
-          path: `/${file.path.replace(/\\/g, '/')}`,
+          path: urlPath,
           size: file.size,
           mimeType: file.mimetype,
           uploadedAt: new Date()
