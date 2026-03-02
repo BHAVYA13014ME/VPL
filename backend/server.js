@@ -181,12 +181,42 @@ process.on('uncaughtException', (error) => {
   // Don't exit immediately, just log it
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-}).on('error', (err) => {
-  console.error('❌ Server listen error:', err);
-  process.exit(1);
-});
+const startServer = () => {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  }).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`⚠️  Port ${PORT} already in use — attempting to free it...`);
+      const { execSync } = require('child_process');
+      try {
+        if (process.platform === 'win32') {
+          const out = execSync(`netstat -ano | findstr :${PORT}`).toString();
+          out.split('\n')
+            .filter(l => l.includes('LISTENING'))
+            .forEach(line => {
+              const pid = line.trim().split(/\s+/).pop();
+              if (pid && pid !== '0') {
+                try { execSync(`taskkill /PID ${pid} /F`); console.log(`  Killed PID ${pid}`); } catch (_) {}
+              }
+            });
+        } else {
+          execSync(`fuser -k ${PORT}/tcp`);
+        }
+        console.log(`🔄 Retrying on port ${PORT} in 1s...`);
+        server.removeAllListeners('error');
+        setTimeout(startServer, 1000);
+      } catch (killErr) {
+        console.error('❌ Could not free port:', killErr.message);
+        process.exit(1);
+      }
+    } else {
+      console.error('❌ Server listen error:', err);
+      process.exit(1);
+    }
+  });
+};
+
+startServer();
 
 module.exports = { app, server, io };
