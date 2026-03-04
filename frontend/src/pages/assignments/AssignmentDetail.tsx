@@ -59,7 +59,6 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import Layout from '../../components/layout/Layout';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
 
 interface Submission {
   _id: string;

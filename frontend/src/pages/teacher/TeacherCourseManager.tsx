@@ -50,7 +50,6 @@ import {
 } from '@mui/icons-material';
 import Layout from '../../components/layout/Layout';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config/api';
 
 interface Lesson {
   _id: string;
