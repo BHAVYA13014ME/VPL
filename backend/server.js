@@ -1,20 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-// Fallback environment variables if .env is not loading
-if (!process.env.JWT_SECRET) {
-  process.env.JWT_SECRET = 'virtual-learning-super-secret-jwt-key-2024';
-  process.env.JWT_EXPIRE = '7d';
-  process.env.NODE_ENV = 'development';
-  process.env.PORT = '5000';
-  process.env.MONGODB_URI = 'mongodb://localhost:27017/virtual-learning';
-  process.env.CLIENT_URL = 'http://localhost:3000'; // Update to match your frontend port
-}
-
-console.log('Environment loaded from:', path.join(__dirname, '.env'));
-console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('PORT:', process.env.PORT);
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -34,7 +20,6 @@ const gamificationRoutes = require('./routes/gamification');
 const profileRoutes = require('./routes/profile');
 const dashboardRoutes = require('./routes/dashboard');
 const leaderboardRoutes = require('./routes/leaderboard');
-const testRoutes = require('./routes/test');
 const quizRoutes = require('./routes/quizzes');
 const callRoutes = require('./routes/calls');
 
@@ -137,7 +122,6 @@ app.use('/api/gamification', gamificationRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
-app.use('/api/test', testRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/calls', callRoutes);
 
