@@ -34,13 +34,27 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
 
   // Initialize peer connection
   const initializePeerConnection = useCallback(() => {
-    // ICE servers configuration - defined inside callback to avoid dependency warning
-    const iceServers = {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-      ],
-    };
+    // Build ICE servers — STUN for peer-to-peer, TURN for NAT traversal
+    const iceServerList: RTCIceServer[] = [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+    ];
+
+    // Use custom TURN server from env vars if provided (required for most production scenarios)
+    const turnUrl = process.env.REACT_APP_TURN_URL;
+    const turnUser = process.env.REACT_APP_TURN_USERNAME;
+    const turnCred = process.env.REACT_APP_TURN_CREDENTIAL;
+    if (turnUrl && turnUser && turnCred) {
+      iceServerList.push({
+        urls: [turnUrl, turnUrl.replace('turn:', 'turns:')],
+        username: turnUser,
+        credential: turnCred,
+      });
+    }
+
+    const iceServers = { iceServers: iceServerList };
 
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
@@ -59,11 +73,12 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
       }
     };
 
-    // Handle ICE candidates
+    // Handle ICE candidates — use callRoomIdRef.current so both caller and callee
+    // always signal on the same room regardless of which chat room is selected
     peerConnection.onicecandidate = (event) => {
       if (event.candidate && socket) {
         socket.emit('call:ice-candidate', {
-          roomId,
+          roomId: callRoomIdRef.current || roomId,
           candidate: event.candidate,
         });
       }
@@ -210,7 +225,7 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
   // Decline call
   const declineCall = useCallback(() => {
     if (socket) {
-      socket.emit('call:decline', { roomId });
+      socket.emit('call:decline', { roomId: callRoomIdRef.current || roomId });
     }
     // endCall will be called separately
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -244,7 +259,7 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
 
     // Notify via socket
     if (socket) {
-      socket.emit('call:end', { roomId });
+      socket.emit('call:end', { roomId: callRoomIdRef.current || roomId });
     }
 
     // Auto-close after a delay
@@ -296,7 +311,13 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
       };
 
       // Store the room to use for ICE exchange
-      if (data.roomId) callRoomIdRef.current = data.roomId;
+      if (data.roomId) {
+        callRoomIdRef.current = data.roomId;
+        // CRITICAL: callee must join the signaling room so ICE candidates
+        // emitted by the caller (socket.to(roomId)) reach the callee.
+        // Without this, caller's ICE candidates are never delivered.
+        socket.emit('join_room', { roomId: data.roomId });
+      }
 
       setCallState('incoming');
       onCallStateChange('incoming');
