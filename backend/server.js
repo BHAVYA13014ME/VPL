@@ -38,11 +38,16 @@ app.set('trust proxy', 1);
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: true,   // reflect any origin
-    methods: ["GET", "POST"],
+    origin: (requestOrigin, callback) => {
+      // Accept all origins — security handled via auth tokens
+      callback(null, requestOrigin || '*');
+    },
+    methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   },
   allowEIO3: true,
+  transports: ['polling', 'websocket'],
 });
 
 // Security middleware
