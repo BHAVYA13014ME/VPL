@@ -38,13 +38,11 @@ app.set('trust proxy', 1);
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      process.env.CLIENT_URL
-    ].filter(Boolean),
+    origin: true,   // reflect any origin
     methods: ["GET", "POST"],
     credentials: true,
-  }
+  },
+  allowEIO3: true,
 });
 
 // Security middleware
