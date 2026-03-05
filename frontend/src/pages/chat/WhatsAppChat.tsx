@@ -2060,12 +2060,20 @@ const WhatsAppChat: React.FC = () => {
             gap: 3,
             bgcolor: '#222e35'
           }}>
-            <img 
-              src="https://web.whatsapp.com/img/intro-connection-light_c98cc75f2aa905314d74f46c2c3f0e17.jpg" 
-              alt="WhatsApp Web"
-              style={{ width: 320, opacity: 0.8 }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
+            {/* Chat placeholder illustration — no external dependency */}
+            <Box sx={{ opacity: 0.7 }}>
+              <svg width="220" height="180" viewBox="0 0 220 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="110" cy="80" r="60" fill="#2a3942"/>
+                <rect x="60" y="55" width="90" height="55" rx="12" fill="#00a884"/>
+                <rect x="72" y="67" width="40" height="6" rx="3" fill="rgba(255,255,255,0.7)"/>
+                <rect x="72" y="79" width="60" height="6" rx="3" fill="rgba(255,255,255,0.5)"/>
+                <rect x="72" y="91" width="30" height="6" rx="3" fill="rgba(255,255,255,0.4)"/>
+                <circle cx="148" cy="118" r="18" fill="#1f2c34" stroke="#2a3942" strokeWidth="3"/>
+                <rect x="141" y="111" width="14" height="14" rx="3" fill="#00a884"/>
+                <rect x="144" y="117" width="2" height="6" rx="1" fill="white"/>
+                <rect x="144" y="114" width="2" height="2" rx="1" fill="white"/>
+              </svg>
+            </Box>
             <Typography variant="h4" sx={{ color: '#e8dcc4', fontWeight: 300 }}>
               EduVerse Chat
             </Typography>

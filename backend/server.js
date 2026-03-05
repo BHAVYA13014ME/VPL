@@ -217,3 +217,52 @@ const startServer = () => {
 startServer();
 
 module.exports = { app, server, io };
+
+// Example user data
+const exampleUser = {
+  "firstName": "Admin",
+  "lastName": "User",
+  "email": "admin@eduverse.com",
+  "password": "$2b$10$2E9xnA92dslCVrzNwmM8neRmr3jQ6.iiYgTXFvUaaNk.wk3sZ/vl.",
+  "role": "admin",
+  "avatar": "",
+  "isActive": true,
+  "isEmailVerified": true,
+  "lastLogin": null,
+  "profile": {
+    "bio": "System Administrator",
+    "phone": "",
+    "location": "",
+    "profilePicture": "",
+    "department": "",
+    "specialization": "",
+    "experience": "",
+    "skills": [],
+    "achievements": [],
+    "socialLinks": {}
+  },
+  "gamification": {
+    "points": 0,
+    "level": 1,
+    "badges": [],
+    "streak": {
+      "current": 0,
+      "longest": 0,
+      "lastActivity": null
+    }
+  },
+  "enrolledCourses": [],
+  "teachingSubjects": [],
+  "qualifications": [],
+  "preferences": {
+    "notifications": {
+      "email": true,
+      "push": true,
+      "assignments": true,
+      "announcements": true
+    },
+    "emailNotifications": true
+  },
+  "createdAt": { "$date": "2026-03-05T00:00:00.000Z" },
+  "updatedAt": { "$date": "2026-03-05T00:00:00.000Z" }
+}

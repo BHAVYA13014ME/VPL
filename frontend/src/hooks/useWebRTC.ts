@@ -29,7 +29,9 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const callTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const callRoomIdRef = useRef<string>(''); // room used for the active call's signaling
+  const callRoomIdRef = useRef<string>('');   // room used for the active call's signaling
+  const callIdRef = useRef<string>('');        // callId from backend, needed for call:answer
+  const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]); // ICE candidates buffered before remoteDescription is set
   const { socket } = useSocket();
 
   // Initialize peer connection
@@ -84,12 +86,17 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
       }
     };
 
-    // Handle connection state changes - note: endCall and startCallTimer are handled separately
+    // Handle connection state changes
     peerConnection.onconnectionstatechange = () => {
       const state = peerConnection.connectionState;
+      console.log('WebRTC connection state:', state);
       if (state === 'connected') {
         setCallState('connected');
         onCallStateChange('connected');
+      } else if (state === 'failed' || state === 'closed') {
+        setCallState('ended');
+        onCallStateChange('ended');
+        setTimeout(() => { setCallState('idle'); onCallStateChange('idle'); }, 2000);
       }
     };
 
@@ -205,22 +212,22 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
       // Use the room from the incoming call's signaling channel
       const signalingRoomId = callRoomIdRef.current || roomId;
 
-      // Send answer via socket
+      // Send answer via socket — include callId so backend can update call history
       if (socket) {
         socket.emit('call:answer', {
           roomId: signalingRoomId,
           answer,
+          callId: callIdRef.current || undefined,
         });
       }
 
-      setCallState('connected');
-      onCallStateChange('connected');
+      // NOTE: do NOT set 'connected' here — wait for onconnectionstatechange
+      // to fire so the UI reflects the actual peer connection state.
     } catch (error) {
       console.error('Error answering call:', error);
-      // Handle error without calling endCall to avoid circular dependency
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentCall, getUserMedia, roomId, socket, onCallStateChange]);
+  }, [currentCall, getUserMedia, roomId, socket]);
 
   // Decline call
   const declineCall = useCallback(() => {
@@ -259,8 +266,16 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
 
     // Notify via socket
     if (socket) {
-      socket.emit('call:end', { roomId: callRoomIdRef.current || roomId });
+      socket.emit('call:end', {
+        roomId: callRoomIdRef.current || roomId,
+        callId: callIdRef.current || undefined,
+      });
     }
+
+    // Reset call refs
+    callRoomIdRef.current = '';
+    callIdRef.current = '';
+    pendingCandidatesRef.current = [];
 
     // Auto-close after a delay
     setTimeout(() => {
@@ -291,10 +306,9 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
   useEffect(() => {
     if (!socket) return;
 
-    const handleCallReceive = (data: {
+    const handleCallReceive = async (data: {
       type: 'voice' | 'video';
       offer: RTCSessionDescriptionInit;
-      // backend sends from/fromName/fromAvatar, not participant
       from?: string;
       fromName?: string;
       fromAvatar?: string;
@@ -310,38 +324,58 @@ export const useWebRTC = ({ roomId, userId, onCallStateChange }: UseWebRTCProps)
         avatar: data.fromAvatar,
       };
 
-      // Store the room to use for ICE exchange
+      // Store signaling room & callId for use in answer/ICE/decline/end
       if (data.roomId) {
         callRoomIdRef.current = data.roomId;
         // CRITICAL: callee must join the signaling room so ICE candidates
         // emitted by the caller (socket.to(roomId)) reach the callee.
-        // Without this, caller's ICE candidates are never delivered.
         socket.emit('join_room', { roomId: data.roomId });
       }
+      if (data.callId) {
+        callIdRef.current = data.callId;
+      }
+
+      // Clear any stale buffered candidates from a previous call
+      pendingCandidatesRef.current = [];
 
       setCallState('incoming');
       onCallStateChange('incoming');
-      setCurrentCall({ 
-        type: data.type, 
-        participant, 
-        isInitiator: false 
+      setCurrentCall({
+        type: data.type,
+        participant,
+        isInitiator: false,
       });
 
       const peerConnection = initializePeerConnection();
-      peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-    };
-
-    const handleCallAnswer = async (data: { answer: RTCSessionDescriptionInit }) => {
-      if (peerConnectionRef.current) {
-        await peerConnectionRef.current.setRemoteDescription(
-          new RTCSessionDescription(data.answer)
-        );
+      // MUST await before adding ICE candidates
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+      // Flush any ICE candidates that arrived during the join_room / setRemoteDescription gap
+      for (const c of pendingCandidatesRef.current) {
+        try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); } catch (_) {}
       }
+      pendingCandidatesRef.current = [];
     };
 
-    const handleIceCandidate = (data: { candidate: RTCIceCandidateInit }) => {
-      if (peerConnectionRef.current) {
-        peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(data.candidate));
+    const handleCallAnswer = async (data: { answer: RTCSessionDescriptionInit; callId?: string }) => {
+      const pc = peerConnectionRef.current;
+      if (!pc) return;
+      // MUST await before adding ICE candidates
+      await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+      // Flush buffered ICE candidates from callee that arrived before answer
+      for (const c of pendingCandidatesRef.current) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (_) {}
+      }
+      pendingCandidatesRef.current = [];
+    };
+
+    const handleIceCandidate = async (data: { candidate: RTCIceCandidateInit }) => {
+      const pc = peerConnectionRef.current;
+      if (!pc) return;
+      // Buffer candidates until remoteDescription is set to avoid InvalidStateError
+      if (pc.remoteDescription && pc.remoteDescription.type) {
+        try { await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch (_) {}
+      } else {
+        pendingCandidatesRef.current.push(data.candidate);
       }
     };
 
